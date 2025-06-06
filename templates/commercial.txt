@@ -1,0 +1,14 @@
+Hi {{name}}! 🏢
+
+I have an exciting commercial opportunity that caught my attention for you. Based on your interest in {{propertyType}} properties, this could be perfect.
+
+✨ Key highlights:
+• Prime location
+• Strong ROI potential
+• {{insights}}
+
+Would you like me to share the details? Happy to arrange a viewing!
+
+Best regards,
+{{agentName}}
+{{agentPhone}}
