@@ -1,0 +1,13 @@
+Hi {{name}}! 🏠
+
+Great news! I found a {{propertyType}} that could be perfect for you.
+
+✨ What makes this special:
+• {{insights}}
+• Move-in ready condition
+• Excellent location and amenities
+
+Interested to know more? I can arrange a viewing this week!
+
+{{agentName}}
+{{agentPhone}}
