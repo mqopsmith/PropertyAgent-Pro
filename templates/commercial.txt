@@ -1,14 +1,10 @@
-Hi {{name}}! 🏢
+Hi {{name}}! 🚨
 
-I have an exciting commercial opportunity that caught my attention for you. Based on your interest in {{propertyType}} properties, this could be perfect.
+A hot commercial {{propertyType}} just came up — it’s a rare find that perfectly matches your criteria and is getting attention fast!  
 
-✨ Key highlights:
-• Prime location
+🔥 Highlights:
+• {{insights}}  
+• Prime location, great accessibility  
 • Strong ROI potential
-• {{insights}}
 
-Would you like me to share the details? Happy to arrange a viewing!
-
-Best regards,
-{{agentName}}
-{{agentPhone}}
+Let’s lock in a viewing before it’s gone! 📞 {{agentName}} {{agentPhone}}
