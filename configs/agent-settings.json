@@ -1,0 +1,18 @@
+{
+  "agentName": "Sarah Lim",
+  "agentPhone": "+65 9123 4567",
+  "company": "ERA Singapore",
+  "googleSheetId": "YOUR_GOOGLE_SHEET_ID_HERE",
+  "defaultTemplate": "commercial",
+  "aiSettings": {
+    "temperature": 0.3,
+    "urgencyKeywords": ["urgent", "asap", "immediate", "today"],
+    "budgetKeywords": ["budget", "million", "investment", "cash"],
+    "hotLeadIndicators": ["ready to buy", "qualified buyer", "pre-approved"]
+  },
+  "messageSettings": {
+    "includeEmojis": true,
+    "maxLength": 500,
+    "personalizeIntro": true
+  }
+}
