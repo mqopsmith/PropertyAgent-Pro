@@ -334,16 +334,6 @@
             line-height: 1.6;
         }
 
-        .debug-info {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 8px;
-            padding: 1rem;
-            margin: 1rem 0;
-            font-family: monospace;
-            font-size: 0.85rem;
-        }
-
         @media (max-width: 768px) {
             .container {
                 padding: 0 1rem;
@@ -415,15 +405,9 @@ Examples:
                 </div>
             </div>
 
-            <!-- Debug Section -->
-            <div id="debugSection" style="display: none;">
-                <h3>🔍 Debug Information</h3>
-                <div class="debug-info" id="debugInfo"></div>
-            </div>
-
             <!-- Matches Section -->
             <div class="matches-section" id="matchesSection">
-                <h2 class="section-title">🎯 Matching Leads Found</h2>
+                <h2 class="section-title">🎯 All Leads (Ranked by Suitability)</h2>
                 
                 <div class="matches-summary" id="matchesSummary">
                     <!-- Summary will be populated by JavaScript -->
@@ -477,13 +461,7 @@ Examples:
             btn.disabled = true;
             isProcessing = true;
 
-            // Show debug section
-            document.getElementById('debugSection').style.display = 'block';
-            updateDebugInfo('🚀 Starting request to n8n...');
-
             try {
-                updateDebugInfo('📤 Sending POST request to: ' + ENDPOINTS.MATCH_LEADS);
-                
                 const response = await fetch(ENDPOINTS.MATCH_LEADS, {
                     method: 'POST',
                     headers: {
@@ -496,16 +474,12 @@ Examples:
                     })
                 });
 
-                updateDebugInfo('📥 Response received - Status: ' + response.status + ' ' + response.statusText);
-                updateDebugInfo('📋 Response headers: ' + JSON.stringify([...response.headers.entries()]));
-
                 if (!response.ok) {
                     throw new Error('HTTP ' + response.status + ': ' + response.statusText);
                 }
 
                 // Get response as text first to see what we're getting
                 const responseText = await response.text();
-                updateDebugInfo('📄 Raw response text: ' + responseText);
 
                 if (!responseText.trim()) {
                     throw new Error('Empty response from n8n workflow');
@@ -515,26 +489,23 @@ Examples:
                 let result;
                 try {
                     result = JSON.parse(responseText);
-                    updateDebugInfo('✅ Successfully parsed JSON: ' + JSON.stringify(result, null, 2));
                 } catch (jsonError) {
-                    updateDebugInfo('❌ JSON Parse Error: ' + jsonError.message);
                     throw new Error('Invalid JSON response: ' + responseText.substring(0, 200) + '...');
                 }
 
                 if (result && result.matches) {
                     currentMatches = result.matches;
                     displayMatches(result);
-                    showNotification('Found ' + result.matches.length + ' matching leads!', 'success');
+                    showNotification('Found ' + result.matches.length + ' leads ranked by suitability!', 'success');
                 } else if (result && result.success) {
                     // Handle case where OpenAI returns wrapped result
-                    updateDebugInfo('🔄 Attempting to parse nested result...');
                     if (typeof result.matches === 'string') {
                         try {
                             const parsedMatches = JSON.parse(result.matches);
                             result.matches = parsedMatches.matches || parsedMatches;
                             currentMatches = result.matches;
                             displayMatches(result);
-                            showNotification('Found ' + result.matches.length + ' matching leads!', 'success');
+                            showNotification('Found ' + result.matches.length + ' leads ranked by suitability!', 'success');
                         } catch (e) {
                             throw new Error('Could not parse matches data');
                         }
@@ -542,26 +513,17 @@ Examples:
                         throw new Error('No matches found in response');
                     }
                 } else {
-                    updateDebugInfo('❌ Unexpected response format: ' + JSON.stringify(result));
-                    throw new Error('Unexpected response format - check debug info below');
+                    throw new Error('Unexpected response format');
                 }
 
             } catch (error) {
                 console.error('Error finding matches:', error);
-                updateDebugInfo('💥 Error: ' + error.message);
                 showNotification('Error finding matches: ' + error.message, 'error');
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
                 isProcessing = false;
             }
-        }
-
-        function updateDebugInfo(message) {
-            const debugInfo = document.getElementById('debugInfo');
-            const timestamp = new Date().toLocaleTimeString();
-            debugInfo.innerHTML += `[${timestamp}] ${message}<br>`;
-            debugInfo.scrollTop = debugInfo.scrollHeight;
         }
 
         function displayMatches(result) {
@@ -575,12 +537,12 @@ Examples:
             const coldCount = result.matches.filter(m => m.matchScore < 60).length;
 
             matchesSummary.innerHTML = `
-                <h3 style="color: #2c3e50; margin-bottom: 1rem;">📊 Match Summary</h3>
+                <h3 style="color: #2c3e50; margin-bottom: 1rem;">📊 Lead Priority Overview</h3>
                 <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
-                    <div><strong>${result.matches.length}</strong> total matches found</div>
-                    <div><strong style="color: #c62828;">${hotCount}</strong> hot matches (80%+)</div>
-                    <div><strong style="color: #ef6c00;">${warmCount}</strong> warm matches (60-79%)</div>
-                    <div><strong style="color: #1565c0;">${coldCount}</strong> cold matches (<60%)</div>
+                    <div><strong>${result.matches.length}</strong> total leads ranked</div>
+                    <div><strong style="color: #c62828;">${hotCount}</strong> hot prospects (80%+) - Message immediately</div>
+                    <div><strong style="color: #ef6c00;">${warmCount}</strong> warm prospects (60-79%) - Follow up today</div>
+                    <div><strong style="color: #1565c0;">${coldCount}</strong> cold prospects (<60%) - Send when available</div>
                 </div>
             `;
 
@@ -676,13 +638,26 @@ Examples:
 
         async function sendMessage(index) {
             const match = currentMatches[index];
-            const cleanPhone = match.phone.replace(/[^\\d]/g, '');
+            
+            // Clean phone number - remove all non-digits and ensure it starts with country code
+            let cleanPhone = match.phone.replace(/[^\\d]/g, '');
+            
+            // Add Singapore country code if not present
+            if (cleanPhone.length === 8) {
+                cleanPhone = '65' + cleanPhone; // Singapore numbers are 8 digits
+            } else if (cleanPhone.startsWith('65') && cleanPhone.length === 10) {
+                // Already has Singapore code
+            } else if (cleanPhone.startsWith('8') || cleanPhone.startsWith('9')) {
+                // Singapore mobile numbers start with 8 or 9
+                cleanPhone = '65' + cleanPhone;
+            }
+            
             const message = match.personalizedMessage;
             
-            // Create WhatsApp URL
+            // Create direct WhatsApp URL to specific contact
             const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
             
-            // Open WhatsApp
+            // Open WhatsApp directly to the contact
             window.open(whatsappUrl, '_blank');
             
             // Mark as sent and update backend
@@ -720,7 +695,6 @@ Examples:
         function clearInput() {
             document.getElementById('propertyInput').value = '';
             document.getElementById('matchesSection').style.display = 'none';
-            document.getElementById('debugSection').style.display = 'none';
             currentMatches = [];
         }
 
