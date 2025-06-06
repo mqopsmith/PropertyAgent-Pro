@@ -643,6 +643,21 @@ Examples:
             showNotification('Message updated successfully', 'success');
         }
 
+        // Function to clean message text for WhatsApp URL encoding
+        function cleanMessageForWhatsApp(message) {
+            return message
+                // Replace problematic unicode characters that don't encode well
+                .replace(/[◇◆⟡]/g, '') // Remove diamond symbols
+                .replace(/[\u2600-\u26FF]/g, '') // Remove miscellaneous symbols
+                .replace(/[\u2700-\u27BF]/g, '') // Remove dingbats
+                .replace(/[\uFE00-\uFE0F]/g, '') // Remove variation selectors
+                // Keep only common emojis and standard characters
+                .replace(/[^\u0000-\u007F\u00A0-\u00FF\u0100-\u017F\u0180-\u024F\u1E00-\u1EFF\u2000-\u206F\u20A0-\u20CF\u2100-\u214F\u2190-\u21FF\u2600-\u26FF\u2700-\u27BF\u1F300-\u1F5FF\u1F600-\u1F64F\u1F680-\u1F6FF\u1F700-\u1F77F\u1F780-\u1F7FF\u1F800-\u1F8FF\u1F900-\u1F9FF\u1FA00-\u1FA6F\u1FA70-\u1FAFF]/g, '')
+                // Clean up extra spaces
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
         async function sendMessage(index) {
             const match = currentMatches[index];
             const sendBtn = document.getElementById(`send-btn-${index}`);
@@ -672,10 +687,15 @@ Examples:
             
             console.log(`Original phone: ${match.phone}, Cleaned: ${cleanPhone}`);
             
-            const message = match.personalizedMessage;
+            // Clean the message for proper WhatsApp URL encoding
+            const originalMessage = match.personalizedMessage;
+            const cleanedMessage = cleanMessageForWhatsApp(originalMessage);
+            
+            console.log('Original message:', originalMessage);
+            console.log('Cleaned message:', cleanedMessage);
             
             // Create WhatsApp URL directly to the specific contact
-            const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+            const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(cleanedMessage)}`;
             
             console.log(`Opening WhatsApp for ${match.name}: ${whatsappUrl}`);
             
@@ -693,7 +713,7 @@ Examples:
                         action: 'message_sent',
                         leadName: match.name,
                         phone: match.phone,
-                        message: message,
+                        message: cleanedMessage,
                         agentId: CONFIG.AGENT_ID
                     })
                 });
