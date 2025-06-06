@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PropertyAgent Pro - AI Template Manager</title>
+    <title>PropertyAgent Pro - Smart Lead Matching</title>
     <style>
         * {
             margin: 0;
@@ -64,7 +64,7 @@
             margin: 2rem auto;
             padding: 0 2rem;
             display: grid;
-            grid-template-columns: 1fr 400px;
+            grid-template-columns: 1fr;
             gap: 2rem;
         }
 
@@ -73,14 +73,6 @@
             border-radius: 16px;
             padding: 2rem;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        }
-
-        .side-panel {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            height: fit-content;
         }
 
         .section-title {
@@ -93,117 +85,36 @@
             gap: 0.5rem;
         }
 
-        .quick-stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
+        .property-input-section {
             margin-bottom: 2rem;
         }
 
-        .stat-card {
-            background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+        .property-input {
+            width: 100%;
+            min-height: 120px;
             padding: 1.5rem;
-            border-radius: 12px;
-            text-align: center;
-            border: 1px solid rgba(102, 126, 234, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #667eea;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        .ai-chat-section {
-            margin-bottom: 2rem;
-        }
-
-        .chat-container {
-            background: #f8f9ff;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
             border: 2px solid #e8f2ff;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .chat-message {
-            margin-bottom: 1rem;
-            padding: 1rem;
             border-radius: 12px;
-            max-width: 80%;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .chat-user {
-            background: #667eea;
-            color: white;
-            margin-left: auto;
-        }
-
-        .chat-ai {
-            background: white;
-            border: 1px solid #ddd;
-            margin-right: auto;
-        }
-
-        .chat-input-container {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-
-        .chat-input {
-            flex: 1;
-            padding: 0.8rem 1rem;
-            border: 2px solid #e8f2ff;
-            border-radius: 25px;
-            font-size: 0.9rem;
+            font-size: 1rem;
             outline: none;
             transition: border-color 0.3s ease;
+            resize: vertical;
+            font-family: inherit;
         }
 
-        .chat-input:focus {
+        .property-input:focus {
             border-color: #667eea;
         }
 
-        .send-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
+        .property-input::placeholder {
+            color: #888;
+            line-height: 1.5;
         }
 
-        .send-btn:hover {
-            background: #5a6fd8;
-            transform: translateY(-2px);
-        }
-
-        .send-btn:disabled {
-            background: #95a5a6;
-            cursor: not-allowed;
-            transform: none;
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
         }
 
         .btn {
@@ -229,6 +140,159 @@
             box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
         }
 
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .matches-section {
+            display: none;
+            margin-top: 2rem;
+        }
+
+        .matches-summary {
+            background: #f8f9ff;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .matches-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .lead-match-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 2px solid #e8f2ff;
+            transition: all 0.3s ease;
+        }
+
+        .lead-match-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .lead-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .lead-info h3 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .lead-details {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .match-score {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .score-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .score-hot { background: #ffebee; color: #c62828; }
+        .score-warm { background: #fff3e0; color: #ef6c00; }
+        .score-cold { background: #e3f2fd; color: #1565c0; }
+
+        .generated-message {
+            background: #f8f9ff;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-left: 3px solid #667eea;
+            position: relative;
+        }
+
+        .message-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #219a52;
+        }
+
+        .btn-edit {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #d68910;
+        }
+
+        .message-editor {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .message-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 1rem;
+            border: 2px solid #e8f2ff;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .message-textarea:focus {
+            border-color: #667eea;
+        }
+
+        .spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         .notification {
             position: fixed;
             top: 20px;
@@ -250,20 +314,40 @@
         .notification.error { background: #e74c3c; }
         .notification.info { background: #3498db; }
 
-        .spinner {
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid #667eea;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            margin-right: 0.5rem;
+        .example-prompts {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8f9ff;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .example-prompts h4 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .example-list {
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .lead-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
         }
     </style>
 </head>
@@ -283,62 +367,56 @@
 
     <div class="container">
         <div class="main-panel">
-            <!-- Quick Stats -->
-            <div class="quick-stats">
-                <div class="stat-card">
-                    <div class="stat-number" id="pendingLeads">15</div>
-                    <div class="stat-label">Pending Leads</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="hotProspects">8</div>
-                    <div class="stat-label">Hot Prospects</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="responseRate">67%</div>
-                    <div class="stat-label">Response Rate</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="templateScore">9.2</div>
-                    <div class="stat-label">Template Score</div>
-                </div>
-            </div>
+            <!-- Property Input Section -->
+            <div class="property-input-section">
+                <h2 class="section-title">🏠 Describe Your Property Listing</h2>
+                <textarea 
+                    class="property-input" 
+                    id="propertyInput" 
+                    placeholder="Describe your property listing here...
 
-            <!-- AI Template Chat -->
-            <div class="ai-chat-section">
-                <h2 class="section-title">🤖 AI Template Assistant</h2>
-                <div class="chat-container" id="chatContainer">
-                    <div class="chat-message chat-ai">
-                        <strong>AI Assistant:</strong> Hi Sarah! 👋 I can help you optimize your message templates or analyze leads. What would you like to do today?
-                    </div>
-                    <div id="chatMessages"></div>
-                </div>
+Examples:
+• New Marina Bay luxury condo - Unit #25-08, $2.3M, 1200sqft with stunning bay views. Immediate occupancy available.
+
+• 3BR HDB in Tampines near MRT, $650K, family-friendly neighborhood, good schools nearby, move-in ready.
+
+• Landed property in Bukit Timah, $3.8M, 2-story terrace, renovated kitchen, private garden, quiet street.
+
+• Commercial shophouse in Chinatown, $1.2M, ground floor retail + upper residential, high foot traffic area."
+                ></textarea>
                 
-                <div class="chat-input-container">
-                    <input type="text" class="chat-input" id="chatInput" placeholder="Type 'analyze my leads' or 'optimize templates'">
-                    <button class="send-btn" id="sendBtn">Send</button>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="findMatchesBtn" onclick="findMatchingLeads()">
+                        🎯 Find Matching Leads
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearInput()">
+                        🗑️ Clear
+                    </button>
+                </div>
+
+                <div class="example-prompts">
+                    <h4>💡 Pro Tips:</h4>
+                    <div class="example-list">
+                        • Include key details: location, price, size, special features<br>
+                        • Mention urgency if applicable: "immediate occupancy", "limited time"<br>
+                        • Add selling points: "stunning views", "near MRT", "good schools"<br>
+                        • The more specific you are, the better AI can match relevant leads
+                    </div>
                 </div>
             </div>
 
-            <!-- Action Buttons -->
-            <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
-                <button class="btn btn-primary" id="processBtn">
-                    🤖 AI Process All Leads
-                </button>
-                <button class="btn btn-primary" onclick="optimizeTemplates()">
-                    🎯 Optimize Templates
-                </button>
-            </div>
-        </div>
+            <!-- Matches Section -->
+            <div class="matches-section" id="matchesSection">
+                <h2 class="section-title">🎯 Matching Leads Found</h2>
+                
+                <div class="matches-summary" id="matchesSummary">
+                    <!-- Summary will be populated by JavaScript -->
+                </div>
 
-        <div class="side-panel">
-            <h3 class="section-title">📝 System Status</h3>
-            <p>Dashboard connected to n8n workflow</p>
-            <p>CORS headers: ✅ Fixed</p>
-            <p>JavaScript: ✅ Clean</p>
-            
-            <h3 class="section-title" style="margin-top: 2rem;">🔗 Quick Links</h3>
-            <p><a href="https://n8n.opsmith.biz" target="_blank" style="color: #667eea;">n8n Dashboard</a></p>
-            <p><a href="https://github.com/mqopsmith/PropertyAgent-Pro" target="_blank" style="color: #667eea;">GitHub Repo</a></p>
+                <div class="matches-grid" id="matchesGrid">
+                    <!-- Lead matches will be populated by JavaScript -->
+                </div>
+            </div>
         </div>
     </div>
 
@@ -353,194 +431,237 @@
         };
 
         const ENDPOINTS = {
-            PROCESS_LEADS: CONFIG.N8N_BASE_URL + '/property-agent-main',
-            UPDATE_TEMPLATES: CONFIG.N8N_BASE_URL + '/update-templates'
+            MATCH_LEADS: CONFIG.N8N_BASE_URL + '/match-leads',
+            SEND_MESSAGE: CONFIG.N8N_BASE_URL + '/send-message'
         };
 
         let isProcessing = false;
+        let currentMatches = [];
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
-            setupEventListeners();
             checkSystemStatus();
         });
 
-        function setupEventListeners() {
-            // Send button click
-            document.getElementById('sendBtn').addEventListener('click', sendMessage);
+        async function findMatchingLeads() {
+            const input = document.getElementById('propertyInput');
+            const btn = document.getElementById('findMatchesBtn');
+            const propertyDescription = input.value.trim();
             
-            // Enter key to send messages
-            document.getElementById('chatInput').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    sendMessage();
-                }
-            });
-
-            // Process leads button
-            document.getElementById('processBtn').addEventListener('click', processLeads);
-        }
-
-        function sendMessage() {
-            var input = document.getElementById('chatInput');
-            var sendBtn = document.getElementById('sendBtn');
-            var message = input.value.trim();
-            
-            if (!message || isProcessing) {
+            if (!propertyDescription) {
+                showNotification('Please describe your property listing first', 'error');
                 return;
             }
 
-            // Disable input
-            input.disabled = true;
-            sendBtn.disabled = true;
-            isProcessing = true;
-
-            // Add user message to chat
-            addChatMessage('user', message);
-            input.value = '';
-
-            // Process the request
-            if (message.toLowerCase().includes('analyze') || message.toLowerCase().includes('process') || message.toLowerCase().includes('lead')) {
-                processLeadsViaAPI();
-            } else if (message.toLowerCase().includes('template') || message.toLowerCase().includes('optimize')) {
-                updateTemplateViaAPI(message);
-            } else {
-                addChatMessage('ai', '🤖 I can help you "analyze leads" or "optimize templates". What would you like to do?');
-                resetInputs();
-            }
-        }
-
-        function processLeads() {
-            var btn = document.getElementById('processBtn');
             if (isProcessing) return;
 
-            var originalText = btn.innerHTML;
-            btn.innerHTML = '<div class="spinner"></div> Processing...';
+            // Update UI
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<div class="spinner"></div> Finding Matches...';
             btn.disabled = true;
             isProcessing = true;
 
-            processLeadsViaAPI().finally(function() {
+            try {
+                const response = await fetch(ENDPOINTS.MATCH_LEADS, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'match_leads',
+                        propertyDescription: propertyDescription,
+                        agentId: CONFIG.AGENT_ID
+                    })
+                });
+
+                console.log('Match leads response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+                }
+
+                const result = await response.json();
+                console.log('Match leads result:', result);
+
+                if (result && result.matches) {
+                    currentMatches = result.matches;
+                    displayMatches(result);
+                    showNotification('Found ' + result.matches.length + ' matching leads!', 'success');
+                } else {
+                    throw new Error('No matches found or invalid response format');
+                }
+
+            } catch (error) {
+                console.error('Error finding matches:', error);
+                showNotification('Error finding matches: ' + error.message, 'error');
+            } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
                 isProcessing = false;
-            });
-        }
-
-        function processLeadsViaAPI() {
-            return fetch(ENDPOINTS.PROCESS_LEADS, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    action: 'process_leads',
-                    agentId: CONFIG.AGENT_ID
-                })
-            })
-            .then(function(response) {
-                console.log('Lead processing response status:', response.status);
-                if (!response.ok) {
-                    throw new Error('HTTP ' + response.status + ': ' + response.statusText);
-                }
-                return response.json();
-            })
-            .then(function(result) {
-                console.log('Lead processing result:', result);
-                if (result && result.success) {
-                    addChatMessage('ai', '✅ Processed ' + (result.processed || 'some') + ' leads! All WhatsApp messages are ready to send with personalized AI insights.');
-                    showNotification((result.processed || 'Lead') + ' leads processed successfully', 'success');
-                } else {
-                    // Handle case where n8n returns data but not in expected format
-                    addChatMessage('ai', '✅ Lead processing completed! Check the results in your Google Sheets.');
-                    showNotification('Lead processing completed', 'success');
-                }
-            })
-            .catch(function(error) {
-                console.error('Error processing leads:', error);
-                addChatMessage('ai', '❌ Error processing leads: ' + error.message);
-                showNotification('Lead processing failed: ' + error.message, 'error');
-            })
-            .finally(function() {
-                resetInputs();
-            });
-        }
-
-        function updateTemplateViaAPI(userRequest) {
-            return fetch(ENDPOINTS.UPDATE_TEMPLATES, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    action: 'update_template',
-                    userRequest: userRequest,
-                    currentTemplate: 'Hi {{name}}! I have an exciting commercial opportunity that matches your {{propertyType}} search criteria.',
-                    propertyType: 'commercial',
-                    agentId: CONFIG.AGENT_ID
-                })
-            })
-            .then(function(response) {
-                console.log('Template update response status:', response.status);
-                console.log('Template update response headers:', response.headers);
-                
-                if (!response.ok) {
-                    throw new Error('HTTP ' + response.status + ': ' + response.statusText);
-                }
-                
-                // Try to parse JSON, but handle cases where response might not be JSON
-                return response.text().then(function(text) {
-                    console.log('Template update response text:', text);
-                    try {
-                        return JSON.parse(text);
-                    } catch (e) {
-                        // If not JSON, check if it's a successful response anyway
-                        if (response.status === 200) {
-                            return { success: true, message: 'Template updated successfully' };
-                        }
-                        throw new Error('Invalid response format: ' + text);
-                    }
-                });
-            })
-            .then(function(result) {
-                console.log('Template update result:', result);
-                
-                // Handle successful response regardless of format
-                addChatMessage('ai', '✅ Templates updated! Your messages have been optimized based on your request: "' + userRequest + '"');
-                showNotification('Template updated successfully', 'success');
-            })
-            .catch(function(error) {
-                console.error('Error updating template:', error);
-                addChatMessage('ai', '❌ Error updating template: ' + error.message);
-                showNotification('Template update failed: ' + error.message, 'error');
-            })
-            .finally(function() {
-                resetInputs();
-            });
-        }
-
-        function resetInputs() {
-            document.getElementById('chatInput').disabled = false;
-            document.getElementById('sendBtn').disabled = false;
-            isProcessing = false;
-        }
-
-        function addChatMessage(sender, message) {
-            var chatContainer = document.getElementById('chatContainer');
-            var messageDiv = document.createElement('div');
-            messageDiv.className = 'chat-message chat-' + sender;
-            
-            if (sender === 'user') {
-                messageDiv.innerHTML = '<strong>You:</strong> ' + message;
-            } else {
-                messageDiv.innerHTML = '<strong>AI Assistant:</strong> ' + message;
             }
+        }
+
+        function displayMatches(result) {
+            const matchesSection = document.getElementById('matchesSection');
+            const matchesSummary = document.getElementById('matchesSummary');
+            const matchesGrid = document.getElementById('matchesGrid');
+
+            // Show summary
+            const hotCount = result.matches.filter(m => m.matchScore >= 80).length;
+            const warmCount = result.matches.filter(m => m.matchScore >= 60 && m.matchScore < 80).length;
+            const coldCount = result.matches.filter(m => m.matchScore < 60).length;
+
+            matchesSummary.innerHTML = `
+                <h3 style="color: #2c3e50; margin-bottom: 1rem;">📊 Match Summary</h3>
+                <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                    <div><strong>${result.matches.length}</strong> total matches found</div>
+                    <div><strong style="color: #c62828;">${hotCount}</strong> hot matches (80%+)</div>
+                    <div><strong style="color: #ef6c00;">${warmCount}</strong> warm matches (60-79%)</div>
+                    <div><strong style="color: #1565c0;">${coldCount}</strong> cold matches (<60%)</div>
+                </div>
+            `;
+
+            // Show individual matches
+            matchesGrid.innerHTML = result.matches.map((match, index) => {
+                const scoreClass = match.matchScore >= 80 ? 'score-hot' : 
+                                 match.matchScore >= 60 ? 'score-warm' : 'score-cold';
+                const scoreLabel = match.matchScore >= 80 ? 'HOT' : 
+                                 match.matchScore >= 60 ? 'WARM' : 'COLD';
+
+                return `
+                    <div class="lead-match-card">
+                        <div class="lead-header">
+                            <div class="lead-info">
+                                <h3>${match.name}</h3>
+                                <div class="lead-details">
+                                    📞 ${match.phone}<br>
+                                    🏠 Interest: ${match.propertyType || 'General'}<br>
+                                    📝 Notes: ${match.notes || 'No additional notes'}
+                                </div>
+                            </div>
+                            <div class="match-score">
+                                <span class="score-badge ${scoreClass}">${scoreLabel}</span>
+                                <span style="font-weight: 600; color: #667eea;">${match.matchScore}%</span>
+                            </div>
+                        </div>
+
+                        <div class="generated-message">
+                            <strong>📱 Generated WhatsApp Message:</strong>
+                            <div style="margin-top: 0.5rem; white-space: pre-line;" id="message-${index}">
+                                ${match.personalizedMessage}
+                            </div>
+                        </div>
+
+                        <div class="message-actions">
+                            <button class="btn btn-success btn-small" onclick="sendMessage(${index})">
+                                📱 Send WhatsApp
+                            </button>
+                            <button class="btn btn-edit btn-small" onclick="editMessage(${index})">
+                                ✏️ Edit Message
+                            </button>
+                        </div>
+
+                        <div class="message-editor" id="editor-${index}">
+                            <textarea class="message-textarea" id="textarea-${index}">${match.personalizedMessage}</textarea>
+                            <div style="margin-top: 0.5rem;">
+                                <button class="btn btn-success btn-small" onclick="saveMessage(${index})">
+                                    💾 Save Changes
+                                </button>
+                                <button class="btn btn-secondary btn-small" onclick="cancelEdit(${index})">
+                                    ❌ Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Show the matches section
+            matchesSection.style.display = 'block';
             
-            chatContainer.appendChild(messageDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            // Scroll to matches
+            matchesSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function editMessage(index) {
+            const editor = document.getElementById('editor-' + index);
+            editor.style.display = 'block';
+        }
+
+        function cancelEdit(index) {
+            const editor = document.getElementById('editor-' + index);
+            const textarea = document.getElementById('textarea-' + index);
+            
+            // Reset textarea to original message
+            textarea.value = currentMatches[index].personalizedMessage;
+            editor.style.display = 'none';
+        }
+
+        function saveMessage(index) {
+            const editor = document.getElementById('editor-' + index);
+            const textarea = document.getElementById('textarea-' + index);
+            const messageDiv = document.getElementById('message-' + index);
+            
+            // Update the displayed message
+            const newMessage = textarea.value;
+            messageDiv.textContent = newMessage;
+            currentMatches[index].personalizedMessage = newMessage;
+            
+            editor.style.display = 'none';
+            showNotification('Message updated successfully', 'success');
+        }
+
+        async function sendMessage(index) {
+            const match = currentMatches[index];
+            const cleanPhone = match.phone.replace(/[^\\d]/g, '');
+            const message = match.personalizedMessage;
+            
+            // Create WhatsApp URL
+            const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+            
+            // Open WhatsApp
+            window.open(whatsappUrl, '_blank');
+            
+            // Mark as sent and update backend
+            try {
+                await fetch(ENDPOINTS.SEND_MESSAGE, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'message_sent',
+                        leadName: match.name,
+                        phone: match.phone,
+                        message: message,
+                        agentId: CONFIG.AGENT_ID
+                    })
+                });
+
+                showNotification(`Message sent to ${match.name}!`, 'success');
+                
+                // Update UI to show sent status
+                const card = document.querySelectorAll('.lead-match-card')[index];
+                const sendBtn = card.querySelector('.btn-success');
+                sendBtn.innerHTML = '✅ Sent';
+                sendBtn.disabled = true;
+                sendBtn.style.background = '#95a5a6';
+                
+            } catch (error) {
+                console.error('Error updating send status:', error);
+                // Still show success since WhatsApp opened
+                showNotification(`Message sent to ${match.name}!`, 'success');
+            }
+        }
+
+        function clearInput() {
+            document.getElementById('propertyInput').value = '';
+            document.getElementById('matchesSection').style.display = 'none';
+            currentMatches = [];
         }
 
         function showNotification(message, type) {
-            var notification = document.getElementById('notification');
+            const notification = document.getElementById('notification');
             notification.textContent = message;
             notification.className = 'notification ' + (type || 'info');
             notification.classList.add('show');
@@ -551,10 +672,10 @@
         }
 
         function checkSystemStatus() {
-            var statusIndicator = document.getElementById('statusIndicator');
+            const statusIndicator = document.getElementById('statusIndicator');
             
-            // Test n8n connectivity with a simple ping
-            fetch(ENDPOINTS.PROCESS_LEADS, {
+            // Test n8n connectivity
+            fetch(ENDPOINTS.MATCH_LEADS, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({action: 'health_check'})
@@ -569,11 +690,6 @@
                 statusIndicator.style.background = 'rgba(231, 76, 60, 0.2)';
                 statusIndicator.style.color = '#e74c3c';
             });
-        }
-
-        function optimizeTemplates() {
-            addChatMessage('ai', '🎯 Template optimization started! This will analyze your current templates and improve them for better engagement.');
-            updateTemplateViaAPI('make my templates more engaging and urgent');
         }
     </script>
 </body>
