@@ -578,7 +578,7 @@ Examples:
                         </div>
 
                         <div class="message-actions">
-                            <button class="btn btn-success btn-small" onclick="sendMessage(${index})">
+                            <button class="btn btn-success btn-small" id="send-btn-${index}" onclick="sendMessage(${index})">
                                 📱 Send WhatsApp
                             </button>
                             <button class="btn btn-edit btn-small" onclick="editMessage(${index})">
@@ -638,29 +638,44 @@ Examples:
 
         async function sendMessage(index) {
             const match = currentMatches[index];
+            const sendBtn = document.getElementById(`send-btn-${index}`);
             
-            // Clean phone number - remove all non-digits and ensure it starts with country code
-            let cleanPhone = match.phone.replace(/[^\\d]/g, '');
+            // Show feedback that button was clicked
+            const originalText = sendBtn.innerHTML;
+            sendBtn.innerHTML = '📱 Opening WhatsApp...';
+            sendBtn.disabled = true;
             
-            // Add Singapore country code if not present
+            // Clean and format phone number for WhatsApp
+            let cleanPhone = match.phone.replace(/[^\d]/g, ''); // Remove all non-digits
+            
+            // Ensure proper Singapore format
             if (cleanPhone.length === 8) {
-                cleanPhone = '65' + cleanPhone; // Singapore numbers are 8 digits
-            } else if (cleanPhone.startsWith('65') && cleanPhone.length === 10) {
-                // Already has Singapore code
-            } else if (cleanPhone.startsWith('8') || cleanPhone.startsWith('9')) {
-                // Singapore mobile numbers start with 8 or 9
+                // Singapore local number, add country code
                 cleanPhone = '65' + cleanPhone;
+            } else if (cleanPhone.length === 10 && cleanPhone.startsWith('65')) {
+                // Already has Singapore country code
+                // Keep as is
+            } else if (cleanPhone.startsWith('8') || cleanPhone.startsWith('9')) {
+                // Singapore mobile numbers start with 8 or 9, add country code
+                cleanPhone = '65' + cleanPhone;
+            } else if (cleanPhone.startsWith('6580') || cleanPhone.startsWith('6590')) {
+                // Already formatted correctly
+                // Keep as is
             }
+            
+            console.log(`Original phone: ${match.phone}, Cleaned: ${cleanPhone}`);
             
             const message = match.personalizedMessage;
             
-            // Create direct WhatsApp URL to specific contact
+            // Create WhatsApp URL directly to the specific contact
             const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
             
-            // Open WhatsApp directly to the contact
+            console.log(`Opening WhatsApp for ${match.name}: ${whatsappUrl}`);
+            
+            // Open WhatsApp directly to the contact with pre-filled message
             window.open(whatsappUrl, '_blank');
             
-            // Mark as sent and update backend
+            // Update backend to track message sent
             try {
                 await fetch(ENDPOINTS.SEND_MESSAGE, {
                     method: 'POST',
@@ -675,21 +690,19 @@ Examples:
                         agentId: CONFIG.AGENT_ID
                     })
                 });
-
-                showNotification(`Message sent to ${match.name}!`, 'success');
-                
-                // Update UI to show sent status
-                const card = document.querySelectorAll('.lead-match-card')[index];
-                const sendBtn = card.querySelector('.btn-success');
-                sendBtn.innerHTML = '✅ Sent';
-                sendBtn.disabled = true;
-                sendBtn.style.background = '#95a5a6';
-                
             } catch (error) {
-                console.error('Error updating send status:', error);
-                // Still show success since WhatsApp opened
-                showNotification(`Message sent to ${match.name}!`, 'success');
+                console.error('Error updating backend:', error);
+                // Continue anyway since WhatsApp opened successfully
             }
+
+            // Show success notification
+            showNotification(`WhatsApp opened for ${match.name}! Message ready to send.`, 'success');
+            
+            // Reset button after a short delay so it can be used again
+            setTimeout(() => {
+                sendBtn.innerHTML = originalText;
+                sendBtn.disabled = false;
+            }, 2000);
         }
 
         function clearInput() {
