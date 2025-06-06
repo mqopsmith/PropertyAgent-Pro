@@ -480,6 +480,7 @@ Examples:
 
                 // Get response as text first to see what we're getting
                 const responseText = await response.text();
+                console.log('Raw response:', responseText);
 
                 if (!responseText.trim()) {
                     throw new Error('Empty response from n8n workflow');
@@ -489,11 +490,14 @@ Examples:
                 let result;
                 try {
                     result = JSON.parse(responseText);
+                    console.log('Parsed result:', result);
                 } catch (jsonError) {
+                    console.error('JSON parse error:', jsonError);
                     throw new Error('Invalid JSON response: ' + responseText.substring(0, 200) + '...');
                 }
 
-                if (result && result.matches) {
+                // Handle the result - be more flexible with response format
+                if (result && result.matches && Array.isArray(result.matches)) {
                     currentMatches = result.matches;
                     displayMatches(result);
                     showNotification('Found ' + result.matches.length + ' leads ranked by suitability!', 'success');
@@ -507,12 +511,15 @@ Examples:
                             displayMatches(result);
                             showNotification('Found ' + result.matches.length + ' leads ranked by suitability!', 'success');
                         } catch (e) {
+                            console.error('Error parsing nested matches:', e);
                             throw new Error('Could not parse matches data');
                         }
                     } else {
+                        console.error('Unexpected result format:', result);
                         throw new Error('No matches found in response');
                     }
                 } else {
+                    console.error('Unexpected response format:', result);
                     throw new Error('Unexpected response format');
                 }
 
