@@ -1,0 +1,11 @@
+Hi {{name}}, hope you're doing well!
+
+I have an exciting {{propertyType}} opportunity that might interest you.
+
+{{insights}}
+
+Would you like to hear more details? I'm happy to share the information and arrange a viewing at your convenience.
+
+Best regards,
+{{agentName}}
+{{agentPhone}}
