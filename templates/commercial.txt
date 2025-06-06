@@ -1,11 +1,1 @@
-Hi {{name}}! 👋  
-
-Spotted a great commercial {{propertyType}} that fits your search perfectly!  
-
-🏙️ Highlights:  
-• {{insights}}  
-• Prime location with superb access  
-• Promising ROI potential 💰  
-
-Keen to explore this opportunity? Let’s chat!  
-– {{agentName}} {{agentPhone}}
+Hi {{name}}! 🚨 A hot commercial opportunity just came up that perfectly fits your {{propertyType}} criteria. It won’t stay on the market for long—want the details now?
