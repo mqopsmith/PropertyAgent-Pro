@@ -1,1 +1,11 @@
-Hi {{name}}! 🚨 A hot commercial opportunity just came up that perfectly fits your {{propertyType}} criteria. It won’t stay on the market for long—want the details now?
+Hi {{name}}! 🚨  
+
+A hot commercial deal just came up that fits your {{propertyType}} search perfectly – and it won’t stay available for long!  
+
+🔥 Highlights:  
+• {{insights}}  
+• Prime location with top accessibility  
+• High ROI potential  
+
+Let’s talk before it’s snapped up!  
+{{agentName}} | {{agentPhone}}
