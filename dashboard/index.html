@@ -643,16 +643,14 @@ Examples:
             showNotification('Message updated successfully', 'success');
         }
 
-        // Function to clean message text for WhatsApp URL encoding
+        // Function to clean message text for WhatsApp URL encoding - ONLY remove problematic characters
         function cleanMessageForWhatsApp(message) {
             return message
-                // Replace problematic unicode characters that don't encode well
-                .replace(/[◇◆⟡]/g, '') // Remove diamond symbols
-                .replace(/[\u2600-\u26FF]/g, '') // Remove miscellaneous symbols
-                .replace(/[\u2700-\u27BF]/g, '') // Remove dingbats
+                // Only remove the specific problematic characters that don't display well
+                .replace(/[◇◆⟡]/g, '') // Remove diamond symbols specifically
+                .replace(/[\u25C7\u25C6\u25CB\u25CF\u25A0\u25A1]/g, '') // Remove geometric shapes that cause issues
                 .replace(/[\uFE00-\uFE0F]/g, '') // Remove variation selectors
-                // Keep only common emojis and standard characters
-                .replace(/[^\u0000-\u007F\u00A0-\u00FF\u0100-\u017F\u0180-\u024F\u1E00-\u1EFF\u2000-\u206F\u20A0-\u20CF\u2100-\u214F\u2190-\u21FF\u2600-\u26FF\u2700-\u27BF\u1F300-\u1F5FF\u1F600-\u1F64F\u1F680-\u1F6FF\u1F700-\u1F77F\u1F780-\u1F7FF\u1F800-\u1F8FF\u1F900-\u1F9FF\u1FA00-\u1FA6F\u1FA70-\u1FAFF]/g, '')
+                // Keep ALL standard emojis and text - don't remove them!
                 // Clean up extra spaces
                 .replace(/\s+/g, ' ')
                 .trim();
@@ -687,7 +685,7 @@ Examples:
             
             console.log(`Original phone: ${match.phone}, Cleaned: ${cleanPhone}`);
             
-            // Clean the message for proper WhatsApp URL encoding
+            // Clean the message ONLY for problematic characters - keep emojis!
             const originalMessage = match.personalizedMessage;
             const cleanedMessage = cleanMessageForWhatsApp(originalMessage);
             
