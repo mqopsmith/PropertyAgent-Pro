@@ -1,18 +1,32 @@
 {
+  "agentId": "sarah-lim-001",
   "agentName": "Sarah Lim",
   "agentPhone": "+65 9123 4567",
   "company": "ERA Singapore",
-  "googleSheetId": "YOUR_GOOGLE_SHEET_ID_HERE",
+  "googleSheetId": "1kd-aCgzPONPOn9ysRBRCweENtD65BuKT34LNGascung",
+  "timezone": "Asia/Singapore",
   "defaultTemplate": "commercial",
+  "preferences": {
+    "autoOptimize": true,
+    "maxDailyMessages": 100,
+    "responseTimeTarget": "2 hours"
+  },
   "aiSettings": {
     "temperature": 0.3,
-    "urgencyKeywords": ["urgent", "asap", "immediate", "today"],
-    "budgetKeywords": ["budget", "million", "investment", "cash"],
-    "hotLeadIndicators": ["ready to buy", "qualified buyer", "pre-approved"]
+    "urgencyKeywords": ["urgent", "asap", "immediate", "today", "quickly"],
+    "budgetKeywords": ["budget", "million", "investment", "cash", "approved"],
+    "hotLeadIndicators": ["ready to buy", "qualified buyer", "pre-approved", "serious", "cash buyer"]
   },
   "messageSettings": {
     "includeEmojis": true,
     "maxLength": 500,
-    "personalizeIntro": true
-  }
+    "personalizeIntro": true,
+    "includeCallToAction": true
+  },
+  "webhookEndpoints": {
+    "processLeads": "/property-agent-main",
+    "updateTemplates": "/update-templates"
+  },
+  "createdAt": "2025-06-06T00:00:00Z",
+  "lastUpdated": "2025-06-06T07:00:00Z"
 }
