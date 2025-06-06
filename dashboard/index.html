@@ -663,11 +663,29 @@
         // Global state
         let templates = {
             commercial: {
-                content: "Hi {{name}}! 🏢\n\nI have an exciting commercial opportunity that matches your {{propertyType}} search criteria.\n\n✨ Key highlights:\n• {{insights}}\n• Prime location with excellent accessibility\n• Strong ROI potential\n\nReady to discuss? {{agentName}} {{agentPhone}}",
+                content: `Hi {{name}}! 🏢
+
+I have an exciting commercial opportunity that matches your {{propertyType}} search criteria.
+
+✨ Key highlights:
+• {{insights}}
+• Prime location with excellent accessibility
+• Strong ROI potential
+
+Ready to discuss? {{agentName}} {{agentPhone}}`,
                 lastUpdated: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
             },
             residential: {
-                content: "Hi {{name}}! 🏠\n\nFound perfect {{propertyType}} match:\n\n✨ What makes this special:\n• {{insights}}\n• Move-in ready condition\n• Excellent location\n\nViewing available? {{agentName}} {{agentPhone}}",
+                content: `Hi {{name}}! 🏠
+
+Found perfect {{propertyType}} match:
+
+✨ What makes this special:
+• {{insights}}
+• Move-in ready condition
+• Excellent location
+
+Viewing available? {{agentName}} {{agentPhone}}`,
                 lastUpdated: new Date(Date.now() - 1 * 60 * 60 * 1000) // 1 hour ago
             }
         };
@@ -713,24 +731,34 @@
             
             if (!message || isProcessing) return;
 
-            // Disable input
-            input.disabled = true;
-            sendBtn.disabled = true;
-            isProcessing = true;
-
-            // Add user message to chat
-            addChatMessage('user', message);
-            input.value = '';
-
-            // Show processing indicator
-            showProcessingIndicator(true);
-
             try {
-                await updateTemplateViaAPI(message);
+                // Disable input
+                input.disabled = true;
+                sendBtn.disabled = true;
+                isProcessing = true;
+
+                // Add user message to chat
+                addChatMessage('user', message);
+                input.value = '';
+
+                // Show processing indicator
+                showProcessingIndicator(true);
+
+                // Check if this is a template optimization request
+                if (message.toLowerCase().includes('template') || 
+                    message.toLowerCase().includes('message') || 
+                    message.toLowerCase().includes('optimize') ||
+                    message.toLowerCase().includes('improve')) {
+                    
+                    await updateTemplateViaAPI(message);
+                } else {
+                    // Handle general lead analysis requests
+                    await processLeadsViaAPI();
+                }
             } catch (error) {
-                console.error('Error updating template:', error);
-                addChatMessage('ai', '❌ Sorry, there was an issue updating the templates. Please check your connection and try again.');
-                showNotification('Template update failed: ' + error.message, 'error');
+                console.error('Error processing request:', error);
+                addChatMessage('ai', '❌ Sorry, there was an issue processing your request. Please check your connection and try again.');
+                showNotification('Request failed: ' + error.message, 'error');
             } finally {
                 // Re-enable input
                 input.disabled = false;
@@ -831,7 +859,7 @@
 
             // Create WhatsApp URL (in real implementation, this would use the generated URL)
             const message = `Hi ${leadName}! 🏠 I have an exciting property opportunity that matches your criteria. Would you like to know more?`;
-            const whatsappUrl = `https://wa.me/${phoneNumber.replace(/[^\d]/g, '')}?text=${encodeURIComponent(message)}`;
+            const whatsappUrl = `https://wa.me/${phoneNumber.replace(/[^\\d]/g, '')}?text=${encodeURIComponent(message)}`;
             
             // Open WhatsApp
             window.open(whatsappUrl, '_blank');
@@ -871,7 +899,7 @@
             const timestampElement = document.getElementById(`${templateType}Updated`);
             
             if (templateElement) {
-                templateElement.innerHTML = newTemplate.replace(/\n/g, '<br>');
+                templateElement.innerHTML = newTemplate.replace(/\\n/g, '<br>');
                 templates[templateType].content = newTemplate;
                 templates[templateType].lastUpdated = new Date();
             }
@@ -1046,11 +1074,19 @@
         }
 
         function analyzePerformance() {
-            addChatMessage('ai', '📈 Response Analysis:\n• Hot leads: 89% response rate\n• Warm leads: 45% response rate\n• Best performing template: Commercial (Updated recently)\n• Suggestion: Add urgency to residential templates for better conversion');
+            addChatMessage('ai', `📈 Response Analysis:
+• Hot leads: 89% response rate
+• Warm leads: 45% response rate  
+• Best performing template: Commercial (Updated recently)
+• Suggestion: Add urgency to residential templates for better conversion`);
         }
 
         function showTemplateHistory() {
-            addChatMessage('ai', '📊 Template Performance:\n• Commercial: 73% response rate (+12% this week)\n• Residential: 68% response rate (+8% this week)\n• Best time to send: 10-11 AM, 3-4 PM\n• Top performing phrase: "Limited time opportunity"');
+            addChatMessage('ai', `📊 Template Performance:
+• Commercial: 73% response rate (+12% this week)
+• Residential: 68% response rate (+8% this week)  
+• Best time to send: 10-11 AM, 3-4 PM
+• Top performing phrase: "Limited time opportunity"`);
         }
 
         // Update timestamps periodically
