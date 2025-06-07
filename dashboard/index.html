@@ -643,17 +643,31 @@ Examples:
             showNotification('Message updated successfully', 'success');
         }
 
-        // Function to clean message text for WhatsApp URL encoding - ONLY remove problematic characters
-        function cleanMessageForWhatsApp(message) {
-            return message
-                // Only remove the specific problematic characters that don't display well
-                .replace(/[◇◆⟡]/g, '') // Remove diamond symbols specifically
-                .replace(/[\u25C7\u25C6\u25CB\u25CF\u25A0\u25A1]/g, '') // Remove geometric shapes that cause issues
+        // Enhanced function to properly encode emojis for WhatsApp Desktop compatibility
+        function encodeMessageForWhatsApp(message) {
+            // First clean any problematic characters
+            let cleanedMessage = message
+                .replace(/[◇◆⟡]/g, '') // Remove diamond symbols
+                .replace(/[\u25C7\u25C6\u25CB\u25CF\u25A0\u25A1]/g, '') // Remove geometric shapes
                 .replace(/[\uFE00-\uFE0F]/g, '') // Remove variation selectors
-                // Keep ALL standard emojis and text - don't remove them!
-                // Clean up extra spaces
                 .replace(/\s+/g, ' ')
                 .trim();
+
+            // For WhatsApp Desktop compatibility, we need to handle emoji encoding specially
+            // Split the text to identify emojis and text separately
+            const emojiRegex = /[\u{1F300}-\u{1F5FF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F700}-\u{1F77F}]|[\u{1F780}-\u{1F7FF}]|[\u{1F800}-\u{1F8FF}]|[\u{1F900}-\u{1F9FF}]|[\u{1FA00}-\u{1FA6F}]|[\u{1FA70}-\u{1FAFF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu;
+            
+            // Replace emojis with URL-safe encoding
+            const encodedMessage = cleanedMessage.replace(emojiRegex, (emoji) => {
+                // Double-encode emojis for better WhatsApp Desktop compatibility
+                return encodeURIComponent(encodeURIComponent(emoji));
+            });
+
+            console.log('Original message:', message);
+            console.log('Cleaned message:', cleanedMessage);
+            console.log('Encoded message:', encodedMessage);
+
+            return encodedMessage;
         }
 
         async function sendMessage(index) {
@@ -685,15 +699,12 @@ Examples:
             
             console.log(`Original phone: ${match.phone}, Cleaned: ${cleanPhone}`);
             
-            // Clean the message ONLY for problematic characters - keep emojis!
+            // Use enhanced encoding for WhatsApp Desktop compatibility
             const originalMessage = match.personalizedMessage;
-            const cleanedMessage = cleanMessageForWhatsApp(originalMessage);
+            const encodedMessage = encodeMessageForWhatsApp(originalMessage);
             
-            console.log('Original message:', originalMessage);
-            console.log('Cleaned message:', cleanedMessage);
-            
-            // Create WhatsApp URL directly to the specific contact
-            const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(cleanedMessage)}`;
+            // Create WhatsApp URL with proper encoding
+            const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
             
             console.log(`Opening WhatsApp for ${match.name}: ${whatsappUrl}`);
             
@@ -711,7 +722,7 @@ Examples:
                         action: 'message_sent',
                         leadName: match.name,
                         phone: match.phone,
-                        message: cleanedMessage,
+                        message: originalMessage,
                         agentId: CONFIG.AGENT_ID
                     })
                 });
