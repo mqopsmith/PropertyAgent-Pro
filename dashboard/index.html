@@ -620,11 +620,19 @@
         }
 
         function handleCloudinaryUpload(uploadInfo) {
+            // For PDFs, Cloudinary returns a different URL structure
+            let fileUrl = uploadInfo.secure_url;
+            
+            // If it's a PDF and the URL contains /image/, replace it with /raw/
+            if (uploadInfo.format === 'pdf' && fileUrl.includes('/image/')) {
+                fileUrl = fileUrl.replace('/image/', '/raw/');
+            }
+            
             const fileData = {
                 name: uploadInfo.original_filename + '.' + uploadInfo.format,
                 type: uploadInfo.resource_type,
                 size: uploadInfo.bytes,
-                cloudinaryUrl: uploadInfo.secure_url,
+                cloudinaryUrl: fileUrl,  // Use the corrected URL
                 publicId: uploadInfo.public_id,
                 format: uploadInfo.format,
                 uploadedAt: new Date().toISOString()
