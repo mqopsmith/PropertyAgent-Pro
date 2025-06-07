@@ -45,18 +45,40 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: 'No property linked to tracking record' });
     }
 
-    // For now, we'll reconstruct the Cloudinary URL based on the file info
-    // Since we don't store the original URL, we'll use the tracking ID pattern
-    const fileName = trackingRecord.fields['File Type'] === 'Property Photos' 
-      ? 'property-photo.jpg' 
-      : 'document.pdf';
+    // Get the property record to find the original Cloudinary URL
+    const propertyResponse = await fetch(
+      `https://api.airtable.com/v0/appqqZz0lhYKvj1xh/tblqMk9e3eBo2ZorB/${propertyIds[0]}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${process.env.AIRTABLE_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    if (!propertyResponse.ok) {
+      throw new Error(`Property fetch error: ${propertyResponse.status}`);
+    }
+
+    const propertyData = await propertyResponse.json();
     
-    // Extract session info from tracking ID (track_timestamp_index)
+    // For now, construct a default Cloudinary URL since we're not storing the exact URL
+    // In the future, we should store the actual Cloudinary URL in the tracking record
+    const fileType = trackingRecord.fields['File Type'];
+    let cloudinaryUrl;
+    
+    // Extract timestamp from tracking ID for session folder
     const parts = trackingId.split('_');
     const timestamp = parts[1];
     
-    // Construct Cloudinary URL
-    const cloudinaryUrl = `https://res.cloudinary.com/dvgfjpjot/image/upload/property-agent-pro/session-${timestamp}/${fileName}`;
+    // Construct Cloudinary URL based on file type
+    if (fileType === 'Property Photos') {
+      cloudinaryUrl = `https://res.cloudinary.com/dvgfjpjot/image/upload/property-agent-pro/session-${timestamp}/screenshot.png`;
+    } else if (fileType === 'Brochure') {
+      cloudinaryUrl = `https://res.cloudinary.com/dvgfjpjot/image/upload/property-agent-pro/session-${timestamp}/brochure.pdf`;
+    } else {
+      cloudinaryUrl = `https://res.cloudinary.com/dvgfjpjot/image/upload/property-agent-pro/session-${timestamp}/document.pdf`;
+    }
 
     // Step 3: Update click count in Airtable
     const currentClickCount = trackingRecord.fields['Click Count'] || 0;
@@ -85,16 +107,14 @@ export default async function handler(req, res) {
     // Step 4: Log the click for debugging
     console.log(`Click tracked: ${trackingId} -> ${cloudinaryUrl} (count: ${currentClickCount + 1})`);
 
-    // Step 5: Redirect to the original Cloudinary URL
+    // Step 5: Redirect to the Cloudinary URL
     return res.redirect(302, cloudinaryUrl);
 
   } catch (error) {
     console.error('Tracking redirect error:', error);
     
-    // Fallback: redirect to a default error page or property website
-    return res.status(500).json({ 
-      error: 'Internal server error',
-      message: 'Failed to process tracking redirect'
-    });
+    // Fallback: redirect to a placeholder image
+    const fallbackUrl = `https://res.cloudinary.com/dvgfjpjot/image/upload/w_800,h_600,c_fill,b_auto,f_auto,q_auto/v1/placeholder.jpg`;
+    return res.redirect(302, fallbackUrl);
   }
 }
