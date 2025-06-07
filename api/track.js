@@ -4,7 +4,14 @@ export const config = {
 
 export default async function handler(request) {
   const url = new URL(request.url)
-  const trackingId = url.pathname.split('/').pop()
+  
+  // Handle both URL formats:
+  // /api/track?id=track_123456789_0 (new format)
+  // /api/track/track_123456789_0 (old format from path)
+  let trackingId = url.searchParams.get('id') || url.pathname.split('/').pop()
+  
+  console.log('Request URL:', request.url)
+  console.log('Extracted trackingId:', trackingId)
   
   // Only allow GET requests
   if (request.method !== 'GET') {
@@ -16,7 +23,11 @@ export default async function handler(request) {
 
   // Validate tracking ID format
   if (!trackingId || !trackingId.startsWith('track_')) {
-    return new Response(JSON.stringify({ error: 'Invalid tracking ID format' }), {
+    return new Response(JSON.stringify({ 
+      error: 'Invalid tracking ID format',
+      received: trackingId,
+      url: request.url
+    }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' }
     })
@@ -40,9 +51,15 @@ export default async function handler(request) {
 
     const airtableData = await airtableResponse.json()
     
+    console.log('Airtable response:', JSON.stringify(airtableData))
+    
     // Check if tracking record exists
     if (!airtableData.records || airtableData.records.length === 0) {
-      return new Response(JSON.stringify({ error: 'Tracking ID not found' }), {
+      return new Response(JSON.stringify({ 
+        error: 'Tracking ID not found',
+        trackingId: trackingId,
+        recordCount: airtableData.records?.length || 0
+      }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' }
       })
@@ -53,8 +70,14 @@ export default async function handler(request) {
     // Step 2: Get the original Cloudinary URL from the tracking record
     const originalUrl = trackingRecord.fields['Original URL']
     
+    console.log('Original URL found:', originalUrl)
+    
     if (!originalUrl) {
-      return new Response(JSON.stringify({ error: 'Original URL not found for this tracking ID' }), {
+      return new Response(JSON.stringify({ 
+        error: 'Original URL not found for this tracking ID',
+        trackingId: trackingId,
+        availableFields: Object.keys(trackingRecord.fields)
+      }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' }
       })
@@ -77,7 +100,7 @@ export default async function handler(request) {
           }
         })
       }
-    ).catch(console.error) // Fire and forget
+    ).catch(error => console.error('Click count update failed:', error))
 
     console.log(`Click tracked: ${trackingId} -> ${originalUrl} (count: ${currentClickCount + 1})`)
 
@@ -87,8 +110,14 @@ export default async function handler(request) {
   } catch (error) {
     console.error('Tracking redirect error:', error)
     
-    // Fallback: redirect to a placeholder image
-    const fallbackUrl = `https://res.cloudinary.com/dvgfjpjot/image/upload/w_800,h_600,c_fill,b_auto,f_auto,q_auto/v1/placeholder.jpg`
-    return Response.redirect(fallbackUrl, 302)
+    // Return error details for debugging
+    return new Response(JSON.stringify({
+      error: 'Tracking redirect failed',
+      trackingId: trackingId,
+      details: error.message
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    })
   }
 }
