@@ -1,8 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  // Remove static export to enable API routes
   trailingSlash: true,
-  distDir: 'out'
 }
 
 module.exports = nextConfig
