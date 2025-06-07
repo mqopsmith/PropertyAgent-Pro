@@ -39,45 +39,11 @@ export default async function handler(req, res) {
 
     const trackingRecord = airtableData.records[0];
     
-    // Step 2: Get the original Cloudinary URL from the property record
-    const propertyIds = trackingRecord.fields.Property;
-    if (!propertyIds || propertyIds.length === 0) {
-      return res.status(404).json({ error: 'No property linked to tracking record' });
-    }
-
-    // Get the property record to find the original Cloudinary URL
-    const propertyResponse = await fetch(
-      `https://api.airtable.com/v0/appqqZz0lhYKvj1xh/tblqMk9e3eBo2ZorB/${propertyIds[0]}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${process.env.AIRTABLE_API_KEY}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-
-    if (!propertyResponse.ok) {
-      throw new Error(`Property fetch error: ${propertyResponse.status}`);
-    }
-
-    const propertyData = await propertyResponse.json();
+    // Step 2: Get the original Cloudinary URL from the tracking record
+    const originalUrl = trackingRecord.fields['Original URL'];
     
-    // For now, construct a default Cloudinary URL since we're not storing the exact URL
-    // In the future, we should store the actual Cloudinary URL in the tracking record
-    const fileType = trackingRecord.fields['File Type'];
-    let cloudinaryUrl;
-    
-    // Extract timestamp from tracking ID for session folder
-    const parts = trackingId.split('_');
-    const timestamp = parts[1];
-    
-    // Construct Cloudinary URL based on file type
-    if (fileType === 'Property Photos') {
-      cloudinaryUrl = `https://res.cloudinary.com/dvgfjpjot/image/upload/property-agent-pro/session-${timestamp}/screenshot.png`;
-    } else if (fileType === 'Brochure') {
-      cloudinaryUrl = `https://res.cloudinary.com/dvgfjpjot/image/upload/property-agent-pro/session-${timestamp}/brochure.pdf`;
-    } else {
-      cloudinaryUrl = `https://res.cloudinary.com/dvgfjpjot/image/upload/property-agent-pro/session-${timestamp}/document.pdf`;
+    if (!originalUrl) {
+      return res.status(404).json({ error: 'Original URL not found for this tracking ID' });
     }
 
     // Step 3: Update click count in Airtable
@@ -105,10 +71,10 @@ export default async function handler(req, res) {
     }
 
     // Step 4: Log the click for debugging
-    console.log(`Click tracked: ${trackingId} -> ${cloudinaryUrl} (count: ${currentClickCount + 1})`);
+    console.log(`Click tracked: ${trackingId} -> ${originalUrl} (count: ${currentClickCount + 1})`);
 
-    // Step 5: Redirect to the Cloudinary URL
-    return res.redirect(302, cloudinaryUrl);
+    // Step 5: Redirect to the actual Cloudinary URL
+    return res.redirect(302, originalUrl);
 
   } catch (error) {
     console.error('Tracking redirect error:', error);
