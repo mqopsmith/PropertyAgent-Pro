@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PropertyAgent Pro - Enhanced Dashboard</title>
+    <!-- Cloudinary Upload Widget -->
+    <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
     <style>
         * {
             margin: 0;
@@ -124,10 +126,10 @@
             transition: all 0.3s ease;
             background: #f8f9fa;
             margin-bottom: 20px;
+            cursor: pointer;
         }
 
-        .upload-area:hover,
-        .upload-area.dragover {
+        .upload-area:hover {
             border-color: #667eea;
             background: #e3f2fd;
             transform: scale(1.02);
@@ -150,10 +152,6 @@
             font-size: 1.1rem;
             color: #666;
             margin-bottom: 15px;
-        }
-
-        .file-input {
-            display: none;
         }
 
         .upload-btn {
@@ -223,6 +221,15 @@
             border-radius: 50%;
             cursor: pointer;
             font-size: 16px;
+        }
+
+        .cloud-upload-status {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-top: 5px;
         }
 
         .action-buttons {
@@ -505,15 +512,14 @@
                 <!-- File Upload Section -->
                 <div class="file-upload-section">
                     <label><strong>📎 Attachments (Optional)</strong></label>
-                    <div class="upload-area" id="uploadArea">
-                        <div class="upload-icon">📎</div>
+                    <div class="upload-area" id="uploadArea" onclick="openCloudinaryWidget()">
+                        <div class="upload-icon">☁️</div>
                         <div class="upload-text">
-                            Drop your files here or <strong>click to browse</strong><br>
+                            Click to upload files to cloud storage<br>
                             <small>Images, PDFs, Brochures, Market Reports (Max 25MB each)</small>
                         </div>
-                        <input type="file" id="fileInput" class="file-input" multiple accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx">
-                        <button type="button" class="upload-btn" onclick="document.getElementById('fileInput').click()">
-                            Choose Files
+                        <button type="button" class="upload-btn" onclick="openCloudinaryWidget()">
+                            📁 Upload to Cloud
                         </button>
                     </div>
                     <div id="filePreview" class="file-preview"></div>
@@ -531,8 +537,8 @@
                 <div class="example-prompts">
                     <h4>💡 Enhanced Capabilities:</h4>
                     <div class="example-list">
-                        • <strong>Any Content Type:</strong> Property listings, market updates, newsletters, investment tips<br>
-                        • <strong>File Attachments:</strong> Upload images, PDFs, reports - each gets trackable links<br>
+                        • <strong>Cloud Storage:</strong> Files uploaded to professional cloud hosting<br>
+                        • <strong>Auto-Optimization:</strong> Images automatically optimized for fast loading<br>
                         • <strong>Smart Ranking:</strong> AI analyzes content and ranks all leads by relevance<br>
                         • <strong>File Tracking:</strong> Know which leads engage with your attachments
                     </div>
@@ -566,7 +572,9 @@
         // Configuration
         const CONFIG = {
             N8N_BASE_URL: 'https://n8n.opsmith.biz/webhook',
-            AGENT_ID: 'sarah-lim-001'
+            AGENT_ID: 'sarah-lim-001',
+            CLOUDINARY_CLOUD_NAME: 'dvgfjpjot',
+            CLOUDINARY_UPLOAD_PRESET: 'property-agent-files'
         };
 
         const ENDPOINTS = {
@@ -574,46 +582,65 @@
             SEND_MESSAGE: CONFIG.N8N_BASE_URL + '/send-message'
         };
 
-        // File upload handling
-        const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('fileInput');
-        const filePreview = document.getElementById('filePreview');
+        // Initialize Cloudinary Widget
+        let cloudinaryWidget;
 
-        // Drag and drop functionality
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
-
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
-
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            const files = Array.from(e.dataTransfer.files);
-            handleFiles(files);
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            const files = Array.from(e.target.files);
-            handleFiles(files);
-        });
-
-        function handleFiles(files) {
-            files.forEach(file => {
-                if (file.size > 25 * 1024 * 1024) {
-                    showNotification('File too large: ' + file.name + ' (Max 25MB)', 'error');
-                    return;
+        function initializeCloudinaryWidget() {
+            cloudinaryWidget = cloudinary.createUploadWidget({
+                cloudName: CONFIG.CLOUDINARY_CLOUD_NAME,
+                uploadPreset: CONFIG.CLOUDINARY_UPLOAD_PRESET,
+                folder: `property-agent-pro/session-${Date.now()}`,
+                resourceType: 'auto',
+                maxFileSize: 25000000, // 25MB
+                sources: ['local', 'url', 'camera'],
+                multiple: true,
+                clientAllowedFormats: ['jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx', 'xls', 'xlsx'],
+                maxFiles: 10,
+                cropping: false,
+                showAdvancedOptions: false,
+                showUploadMoreButton: false,
+                theme: 'minimal'
+            }, (error, result) => {
+                if (!error && result && result.event === "success") {
+                    handleCloudinaryUpload(result.info);
                 }
-                uploadedFiles.push(file);
+                
+                if (error) {
+                    console.error('Cloudinary upload error:', error);
+                    showNotification('Upload failed: ' + error.message, 'error');
+                }
             });
+        }
+
+        function openCloudinaryWidget() {
+            if (!cloudinaryWidget) {
+                initializeCloudinaryWidget();
+            }
+            cloudinaryWidget.open();
+        }
+
+        function handleCloudinaryUpload(uploadInfo) {
+            const fileData = {
+                name: uploadInfo.original_filename + '.' + uploadInfo.format,
+                type: uploadInfo.resource_type,
+                size: uploadInfo.bytes,
+                cloudinaryUrl: uploadInfo.secure_url,
+                publicId: uploadInfo.public_id,
+                format: uploadInfo.format,
+                uploadedAt: new Date().toISOString()
+            };
+            
+            uploadedFiles.push(fileData);
             updateFilePreview();
+            
+            console.log('File uploaded to Cloudinary:', fileData);
+            showNotification(`✅ ${fileData.name} uploaded successfully!`, 'success');
         }
 
         function updateFilePreview() {
+            const filePreview = document.getElementById('filePreview');
             filePreview.innerHTML = '';
+            
             uploadedFiles.forEach((file, index) => {
                 const fileItem = document.createElement('div');
                 fileItem.className = 'file-item';
@@ -622,8 +649,9 @@
                     <div class="file-info">
                         <div class="file-name">${file.name}</div>
                         <div class="file-size">${formatFileSize(file.size)}</div>
+                        <div class="cloud-upload-status">☁️ Uploaded to cloud storage</div>
                     </div>
-                    <button type="button" class="remove-file" onclick="removeFile(${index})">×</button>
+                    <button type="button" class="remove-file" onclick="removeFile(${index})" title="Remove file">×</button>
                 `;
                 filePreview.appendChild(fileItem);
             });
@@ -632,13 +660,13 @@
         function removeFile(index) {
             uploadedFiles.splice(index, 1);
             updateFilePreview();
+            showNotification('File removed', 'info');
         }
 
         function getFileIcon(fileType) {
-            if (fileType.startsWith('image/')) return '🖼️';
-            if (fileType === 'application/pdf') return '📄';
-            if (fileType.includes('word')) return '📝';
-            if (fileType.includes('excel') || fileType.includes('spreadsheet')) return '📊';
+            if (fileType === 'image') return '🖼️';
+            if (fileType === 'raw') return '📄'; // PDFs show as raw in Cloudinary
+            if (fileType === 'video') return '🎥';
             return '📁';
         }
 
@@ -652,6 +680,7 @@
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
+            initializeCloudinaryWidget();
             checkSystemStatus();
         });
 
@@ -674,7 +703,7 @@
             isProcessing = true;
 
             try {
-                // Prepare request payload with file information
+                // Prepare request payload with Cloudinary file information
                 const requestPayload = {
                     action: 'match_leads',
                     messageContent: messageContent,
@@ -682,7 +711,9 @@
                     uploadedFiles: uploadedFiles.map(file => ({
                         name: file.name,
                         type: file.type,
-                        size: file.size
+                        size: file.size,
+                        cloudinaryUrl: file.cloudinaryUrl,
+                        publicId: file.publicId
                     }))
                 };
 
@@ -746,7 +777,7 @@
                     displayMatches(result);
                     
                     const fileCount = uploadedFiles.length;
-                    const fileMsg = fileCount > 0 ? ` with ${fileCount} tracked file${fileCount > 1 ? 's' : ''}` : '';
+                    const fileMsg = fileCount > 0 ? ` with ${fileCount} cloud-hosted file${fileCount > 1 ? 's' : ''}` : '';
                     showNotification(`Found ${result.matches.length} leads ranked by relevance${fileMsg}!`, 'success');
                 } else {
                     console.error('Unexpected result format:', result);
@@ -777,7 +808,7 @@
             const coldCount = result.matches.filter(m => (m.matchScore || m.relevanceScore) < 60).length;
             
             const fileInfo = uploadedFiles.length > 0 ? 
-                `<div style="margin-top: 1rem;"><strong>📎 ${uploadedFiles.length} file${uploadedFiles.length > 1 ? 's' : ''} attached</strong> - trackable links included in messages</div>` : '';
+                `<div style="margin-top: 1rem;"><strong>☁️ ${uploadedFiles.length} file${uploadedFiles.length > 1 ? 's' : ''} uploaded to cloud</strong> - trackable links included in messages</div>` : '';
 
             matchesSummary.innerHTML = `
                 <h3 style="color: #2c3e50; margin-bottom: 1rem;">📊 Lead Relevance Analysis</h3>
@@ -816,7 +847,7 @@
                         </div>
 
                         <div class="generated-message">
-                            <strong>📱 AI-Generated Message ${uploadedFiles.length > 0 ? '(with file links)' : ''}:</strong>
+                            <strong>📱 AI-Generated Message ${uploadedFiles.length > 0 ? '(with cloud file links)' : ''}:</strong>
                             <div style="margin-top: 0.5rem; white-space: pre-line;" id="message-${index}">
                                 ${match.personalizedMessage || 'No message generated'}
                             </div>
