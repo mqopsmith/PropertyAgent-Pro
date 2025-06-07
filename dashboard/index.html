@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PropertyAgent Pro - Smart Lead Matching</title>
+    <title>PropertyAgent Pro - Enhanced Dashboard</title>
     <style>
         * {
             margin: 0;
@@ -109,6 +109,120 @@
         .property-input::placeholder {
             color: #888;
             line-height: 1.5;
+        }
+
+        /* File Upload Styles */
+        .file-upload-section {
+            margin: 1.5rem 0;
+        }
+
+        .upload-area {
+            border: 3px dashed #ddd;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: #e3f2fd;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            width: 60px;
+            height: 60px;
+            background: #667eea;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        /* File Preview */
+        .file-preview {
+            margin-top: 20px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            background: #4CAF50;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .file-size {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .remove-file {
+            background: #f44336;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
         }
 
         .action-buttons {
@@ -348,6 +462,10 @@
                 align-items: flex-start;
                 gap: 0.5rem;
             }
+
+            .upload-area {
+                padding: 30px 20px;
+            }
         }
     </style>
 </head>
@@ -369,45 +487,61 @@
         <div class="main-panel">
             <!-- Property Input Section -->
             <div class="property-input-section">
-                <h2 class="section-title">🏠 Describe Your Property Listing</h2>
+                <h2 class="section-title">✏️ Create Your Message</h2>
                 <textarea 
                     class="property-input" 
-                    id="propertyInput" 
-                    placeholder="Describe your property listing here...
+                    id="messageInput" 
+                    placeholder="Write your message here... This could be:
 
-Examples:
-• New Marina Bay luxury condo - Unit #25-08, $2.3M, 1200sqft with stunning bay views. Immediate occupancy available.
+• Property Listing: 'New Marina Bay luxury condo - 3BR/2BA, $2.3M, stunning bay views, immediate occupancy'
 
-• 3BR HDB in Tampines near MRT, $650K, family-friendly neighborhood, good schools nearby, move-in ready.
+• Market Update: 'Weekly Singapore property market update: CBD condo prices up 8% this quarter, new launches showing strong demand...'
 
-• Landed property in Bukit Timah, $3.8M, 2-story terrace, renovated kitchen, private garden, quiet street.
+• Newsletter: 'Investment opportunities in emerging districts, rental yields holding steady at 3-4%...'
 
-• Commercial shophouse in Chinatown, $1.2M, ground floor retail + upper residential, high foot traffic area."
+• General Content: Any property-related message you want to share with relevant leads"
                 ></textarea>
+                
+                <!-- File Upload Section -->
+                <div class="file-upload-section">
+                    <label><strong>📎 Attachments (Optional)</strong></label>
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">📎</div>
+                        <div class="upload-text">
+                            Drop your files here or <strong>click to browse</strong><br>
+                            <small>Images, PDFs, Brochures, Market Reports (Max 25MB each)</small>
+                        </div>
+                        <input type="file" id="fileInput" class="file-input" multiple accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx">
+                        <button type="button" class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                            Choose Files
+                        </button>
+                    </div>
+                    <div id="filePreview" class="file-preview"></div>
+                </div>
                 
                 <div class="action-buttons">
                     <button class="btn btn-primary" id="findMatchesBtn" onclick="findMatchingLeads()">
-                        🎯 Find Matching Leads
+                        🔍 Find Relevant Leads
                     </button>
                     <button class="btn btn-secondary" onclick="clearInput()">
-                        🗑️ Clear
+                        🗑️ Clear All
                     </button>
                 </div>
 
                 <div class="example-prompts">
-                    <h4>💡 Pro Tips:</h4>
+                    <h4>💡 Enhanced Capabilities:</h4>
                     <div class="example-list">
-                        • Include key details: location, price, size, special features<br>
-                        • Mention urgency if applicable: "immediate occupancy", "limited time"<br>
-                        • Add selling points: "stunning views", "near MRT", "good schools"<br>
-                        • The more specific you are, the better AI can match relevant leads
+                        • <strong>Any Content Type:</strong> Property listings, market updates, newsletters, investment tips<br>
+                        • <strong>File Attachments:</strong> Upload images, PDFs, reports - each gets trackable links<br>
+                        • <strong>Smart Ranking:</strong> AI analyzes content and ranks all leads by relevance<br>
+                        • <strong>File Tracking:</strong> Know which leads engage with your attachments
                     </div>
                 </div>
             </div>
 
             <!-- Matches Section -->
             <div class="matches-section" id="matchesSection">
-                <h2 class="section-title">🎯 All Leads (Ranked by Suitability)</h2>
+                <h2 class="section-title">🎯 All Leads (Ranked by Relevance)</h2>
                 
                 <div class="matches-summary" id="matchesSummary">
                     <!-- Summary will be populated by JavaScript -->
@@ -424,6 +558,11 @@ Examples:
     <div id="notification" class="notification"></div>
 
     <script>
+        // Global variables
+        let uploadedFiles = [];
+        let isProcessing = false;
+        let currentMatches = [];
+
         // Configuration
         const CONFIG = {
             N8N_BASE_URL: 'https://n8n.opsmith.biz/webhook',
@@ -435,8 +574,81 @@ Examples:
             SEND_MESSAGE: CONFIG.N8N_BASE_URL + '/send-message'
         };
 
-        let isProcessing = false;
-        let currentMatches = [];
+        // File upload handling
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const filePreview = document.getElementById('filePreview');
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files);
+            handleFiles(files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            handleFiles(files);
+        });
+
+        function handleFiles(files) {
+            files.forEach(file => {
+                if (file.size > 25 * 1024 * 1024) {
+                    showNotification('File too large: ' + file.name + ' (Max 25MB)', 'error');
+                    return;
+                }
+                uploadedFiles.push(file);
+            });
+            updateFilePreview();
+        }
+
+        function updateFilePreview() {
+            filePreview.innerHTML = '';
+            uploadedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <div class="file-icon">${getFileIcon(file.type)}</div>
+                    <div class="file-info">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${formatFileSize(file.size)}</div>
+                    </div>
+                    <button type="button" class="remove-file" onclick="removeFile(${index})">×</button>
+                `;
+                filePreview.appendChild(fileItem);
+            });
+        }
+
+        function removeFile(index) {
+            uploadedFiles.splice(index, 1);
+            updateFilePreview();
+        }
+
+        function getFileIcon(fileType) {
+            if (fileType.startsWith('image/')) return '🖼️';
+            if (fileType === 'application/pdf') return '📄';
+            if (fileType.includes('word')) return '📝';
+            if (fileType.includes('excel') || fileType.includes('spreadsheet')) return '📊';
+            return '📁';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
@@ -444,12 +656,12 @@ Examples:
         });
 
         async function findMatchingLeads() {
-            const input = document.getElementById('propertyInput');
+            const input = document.getElementById('messageInput');
             const btn = document.getElementById('findMatchesBtn');
-            const propertyDescription = input.value.trim();
+            const messageContent = input.value.trim();
             
-            if (!propertyDescription) {
-                showNotification('Please describe your property listing first', 'error');
+            if (!messageContent) {
+                showNotification('Please enter your message content first', 'error');
                 return;
             }
 
@@ -457,21 +669,31 @@ Examples:
 
             // Update UI
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<div class="spinner"></div> Finding Matches...';
+            btn.innerHTML = '<div class="spinner"></div> Analyzing Message & Finding Leads...';
             btn.disabled = true;
             isProcessing = true;
 
             try {
+                // Prepare request payload with file information
+                const requestPayload = {
+                    action: 'match_leads',
+                    messageContent: messageContent,
+                    agentId: CONFIG.AGENT_ID,
+                    uploadedFiles: uploadedFiles.map(file => ({
+                        name: file.name,
+                        type: file.type,
+                        size: file.size
+                    }))
+                };
+
+                console.log('Sending request:', requestPayload);
+
                 const response = await fetch(ENDPOINTS.MATCH_LEADS, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        action: 'match_leads',
-                        propertyDescription: propertyDescription,
-                        agentId: CONFIG.AGENT_ID
-                    })
+                    body: JSON.stringify(requestPayload)
                 });
 
                 if (!response.ok) {
@@ -500,7 +722,10 @@ Examples:
                 if (result && result.matches && Array.isArray(result.matches)) {
                     currentMatches = result.matches;
                     displayMatches(result);
-                    showNotification('Found ' + result.matches.length + ' leads ranked by suitability!', 'success');
+                    
+                    const fileCount = uploadedFiles.length;
+                    const fileMsg = fileCount > 0 ? ` with ${fileCount} tracked file${fileCount > 1 ? 's' : ''}` : '';
+                    showNotification(`Found ${result.matches.length} leads ranked by relevance${fileMsg}!`, 'success');
                 } else if (result && result.success) {
                     // Handle case where OpenAI returns wrapped result
                     if (typeof result.matches === 'string') {
@@ -509,7 +734,7 @@ Examples:
                             result.matches = parsedMatches.matches || parsedMatches;
                             currentMatches = result.matches;
                             displayMatches(result);
-                            showNotification('Found ' + result.matches.length + ' leads ranked by suitability!', 'success');
+                            showNotification('Found ' + result.matches.length + ' leads ranked by relevance!', 'success');
                         } catch (e) {
                             console.error('Error parsing nested matches:', e);
                             throw new Error('Could not parse matches data');
@@ -538,27 +763,31 @@ Examples:
             const matchesSummary = document.getElementById('matchesSummary');
             const matchesGrid = document.getElementById('matchesGrid');
 
-            // Show summary
+            // Show summary with file information
             const hotCount = result.matches.filter(m => m.matchScore >= 80).length;
             const warmCount = result.matches.filter(m => m.matchScore >= 60 && m.matchScore < 80).length;
             const coldCount = result.matches.filter(m => m.matchScore < 60).length;
+            
+            const fileInfo = uploadedFiles.length > 0 ? 
+                `<div style="margin-top: 1rem;"><strong>📎 ${uploadedFiles.length} file${uploadedFiles.length > 1 ? 's' : ''} attached</strong> - trackable links included in messages</div>` : '';
 
             matchesSummary.innerHTML = `
-                <h3 style="color: #2c3e50; margin-bottom: 1rem;">📊 Lead Priority Overview</h3>
+                <h3 style="color: #2c3e50; margin-bottom: 1rem;">📊 Lead Relevance Analysis</h3>
                 <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
                     <div><strong>${result.matches.length}</strong> total leads ranked</div>
-                    <div><strong style="color: #c62828;">${hotCount}</strong> hot prospects (80%+) - Message immediately</div>
-                    <div><strong style="color: #ef6c00;">${warmCount}</strong> warm prospects (60-79%) - Follow up today</div>
-                    <div><strong style="color: #1565c0;">${coldCount}</strong> cold prospects (<60%) - Send when available</div>
+                    <div><strong style="color: #c62828;">${hotCount}</strong> highly relevant (80%+)</div>
+                    <div><strong style="color: #ef6c00;">${warmCount}</strong> moderately relevant (60-79%)</div>
+                    <div><strong style="color: #1565c0;">${coldCount}</strong> lower relevance (<60%)</div>
                 </div>
+                ${fileInfo}
             `;
 
             // Show individual matches
             matchesGrid.innerHTML = result.matches.map((match, index) => {
                 const scoreClass = match.matchScore >= 80 ? 'score-hot' : 
                                  match.matchScore >= 60 ? 'score-warm' : 'score-cold';
-                const scoreLabel = match.matchScore >= 80 ? 'HOT' : 
-                                 match.matchScore >= 60 ? 'WARM' : 'COLD';
+                const scoreLabel = match.matchScore >= 80 ? 'HIGH' : 
+                                 match.matchScore >= 60 ? 'MEDIUM' : 'LOW';
 
                 return `
                     <div class="lead-match-card">
@@ -578,7 +807,7 @@ Examples:
                         </div>
 
                         <div class="generated-message">
-                            <strong>📱 Generated WhatsApp Message:</strong>
+                            <strong>📱 AI-Generated Message ${uploadedFiles.length > 0 ? '(with file links)' : ''}:</strong>
                             <div style="margin-top: 0.5rem; white-space: pre-line;" id="message-${index}">
                                 ${match.personalizedMessage}
                             </div>
@@ -648,14 +877,14 @@ Examples:
             return message
                 // Remove only the specific problematic symbols
                 .replace(/[◇◆⟡]/g, '') 
-                .replace(/[\u25C7\u25C6]/g, '') 
+                .replace(/[\\u25C7\\u25C6]/g, '') 
                 // Remove any other geometric symbols that might cause issues
-                .replace(/[\u2600-\u26FF]/g, function(match) {
+                .replace(/[\\u2600-\\u26FF]/g, function(match) {
                     // Keep only these safe emojis
-                    const safeEmojis = ['📞', '🏠', '🏢', '💰', '📍', '✨', '💡', '🎯', '📈', '⭐'];
+                    const safeEmojis = ['📞', '🏠', '🏢', '💰', '📍', '✨', '💡', '🎯', '📈', '⭐', '📄', '📸', '📊'];
                     return safeEmojis.includes(match) ? match : '';
                 })
-                .replace(/\s+/g, ' ')
+                .replace(/\\s+/g, ' ')
                 .trim();
         }
 
@@ -669,7 +898,7 @@ Examples:
             sendBtn.disabled = true;
             
             // Clean and format phone number for WhatsApp
-            let cleanPhone = match.phone.replace(/[^\d]/g, ''); // Remove all non-digits
+            let cleanPhone = match.phone.replace(/[^\\d]/g, ''); // Remove all non-digits
             
             // Ensure proper Singapore format
             if (cleanPhone.length === 8) {
@@ -684,14 +913,14 @@ Examples:
             
             console.log(`Original phone: ${match.phone}, Cleaned: ${cleanPhone}`);
             
-            // Clean the message for WhatsApp compatibility - much simpler approach
+            // Clean the message for WhatsApp compatibility
             const originalMessage = match.personalizedMessage;
             const cleanedMessage = cleanMessageForWhatsApp(originalMessage);
             
             console.log('Original message:', originalMessage);
             console.log('Cleaned message:', cleanedMessage);
             
-            // Simple URL encoding - no double encoding
+            // Simple URL encoding
             const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(cleanedMessage)}`;
             
             console.log(`Opening WhatsApp for ${match.name}: ${whatsappUrl}`);
@@ -730,8 +959,10 @@ Examples:
         }
 
         function clearInput() {
-            document.getElementById('propertyInput').value = '';
+            document.getElementById('messageInput').value = '';
             document.getElementById('matchesSection').style.display = 'none';
+            uploadedFiles = [];
+            updateFilePreview();
             currentMatches = [];
         }
 
