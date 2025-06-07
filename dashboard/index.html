@@ -708,44 +708,49 @@
                     throw new Error('Empty response from n8n workflow');
                 }
 
+                // Clean the response - remove any markdown formatting or extra characters
+                let cleanedResponse = responseText.trim();
+
+                // Remove ```json prefix and suffix if present
+                if (cleanedResponse.startsWith('```json')) {
+                    cleanedResponse = cleanedResponse.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+                }
+
+                // Remove any leading/trailing quotes or equals signs
+                cleanedResponse = cleanedResponse.replace(/^[="']+/, '').replace(/[="']+$/, '');
+
+                console.log('Cleaned response:', cleanedResponse);
+
                 // Try to parse as JSON
                 let result;
                 try {
-                    result = JSON.parse(responseText);
+                    result = JSON.parse(cleanedResponse);
                     console.log('Parsed result:', result);
                 } catch (jsonError) {
                     console.error('JSON parse error:', jsonError);
-                    throw new Error('Invalid JSON response: ' + responseText.substring(0, 200) + '...');
+                    console.error('Failed to parse:', cleanedResponse.substring(0, 200));
+                    throw new Error('Invalid JSON response after cleaning');
                 }
 
-                // Handle the result - be more flexible with response format
+                // Handle the result - check for matches array and handle relevanceScore vs matchScore
                 if (result && result.matches && Array.isArray(result.matches)) {
+                    // Fix field name inconsistency - relevanceScore vs matchScore
+                    result.matches = result.matches.map(match => {
+                        if (match.relevanceScore && !match.matchScore) {
+                            match.matchScore = match.relevanceScore;
+                        }
+                        return match;
+                    });
+
                     currentMatches = result.matches;
                     displayMatches(result);
                     
                     const fileCount = uploadedFiles.length;
                     const fileMsg = fileCount > 0 ? ` with ${fileCount} tracked file${fileCount > 1 ? 's' : ''}` : '';
                     showNotification(`Found ${result.matches.length} leads ranked by relevance${fileMsg}!`, 'success');
-                } else if (result && result.success) {
-                    // Handle case where OpenAI returns wrapped result
-                    if (typeof result.matches === 'string') {
-                        try {
-                            const parsedMatches = JSON.parse(result.matches);
-                            result.matches = parsedMatches.matches || parsedMatches;
-                            currentMatches = result.matches;
-                            displayMatches(result);
-                            showNotification('Found ' + result.matches.length + ' leads ranked by relevance!', 'success');
-                        } catch (e) {
-                            console.error('Error parsing nested matches:', e);
-                            throw new Error('Could not parse matches data');
-                        }
-                    } else {
-                        console.error('Unexpected result format:', result);
-                        throw new Error('No matches found in response');
-                    }
                 } else {
-                    console.error('Unexpected response format:', result);
-                    throw new Error('Unexpected response format');
+                    console.error('Unexpected result format:', result);
+                    throw new Error('Response missing matches array');
                 }
 
             } catch (error) {
@@ -764,9 +769,12 @@
             const matchesGrid = document.getElementById('matchesGrid');
 
             // Show summary with file information
-            const hotCount = result.matches.filter(m => m.matchScore >= 80).length;
-            const warmCount = result.matches.filter(m => m.matchScore >= 60 && m.matchScore < 80).length;
-            const coldCount = result.matches.filter(m => m.matchScore < 60).length;
+            const hotCount = result.matches.filter(m => (m.matchScore || m.relevanceScore) >= 80).length;
+            const warmCount = result.matches.filter(m => {
+                const score = m.matchScore || m.relevanceScore;
+                return score >= 60 && score < 80;
+            }).length;
+            const coldCount = result.matches.filter(m => (m.matchScore || m.relevanceScore) < 60).length;
             
             const fileInfo = uploadedFiles.length > 0 ? 
                 `<div style="margin-top: 1rem;"><strong>📎 ${uploadedFiles.length} file${uploadedFiles.length > 1 ? 's' : ''} attached</strong> - trackable links included in messages</div>` : '';
@@ -784,32 +792,33 @@
 
             // Show individual matches
             matchesGrid.innerHTML = result.matches.map((match, index) => {
-                const scoreClass = match.matchScore >= 80 ? 'score-hot' : 
-                                 match.matchScore >= 60 ? 'score-warm' : 'score-cold';
-                const scoreLabel = match.matchScore >= 80 ? 'HIGH' : 
-                                 match.matchScore >= 60 ? 'MEDIUM' : 'LOW';
+                const score = match.matchScore || match.relevanceScore || 0;
+                const scoreClass = score >= 80 ? 'score-hot' : 
+                                 score >= 60 ? 'score-warm' : 'score-cold';
+                const scoreLabel = score >= 80 ? 'HIGH' : 
+                                 score >= 60 ? 'MEDIUM' : 'LOW';
 
                 return `
                     <div class="lead-match-card">
                         <div class="lead-header">
                             <div class="lead-info">
-                                <h3>${match.name}</h3>
+                                <h3>${match.name || 'Unknown Lead'}</h3>
                                 <div class="lead-details">
-                                    📞 ${match.phone}<br>
+                                    📞 ${match.phone || 'No phone'}<br>
                                     🏠 Interest: ${match.propertyType || 'General'}<br>
                                     📝 Notes: ${match.notes || 'No additional notes'}
                                 </div>
                             </div>
                             <div class="match-score">
                                 <span class="score-badge ${scoreClass}">${scoreLabel}</span>
-                                <span style="font-weight: 600; color: #667eea;">${match.matchScore}%</span>
+                                <span style="font-weight: 600; color: #667eea;">${score}%</span>
                             </div>
                         </div>
 
                         <div class="generated-message">
                             <strong>📱 AI-Generated Message ${uploadedFiles.length > 0 ? '(with file links)' : ''}:</strong>
                             <div style="margin-top: 0.5rem; white-space: pre-line;" id="message-${index}">
-                                ${match.personalizedMessage}
+                                ${match.personalizedMessage || 'No message generated'}
                             </div>
                         </div>
 
@@ -823,7 +832,7 @@
                         </div>
 
                         <div class="message-editor" id="editor-${index}">
-                            <textarea class="message-textarea" id="textarea-${index}">${match.personalizedMessage}</textarea>
+                            <textarea class="message-textarea" id="textarea-${index}">${match.personalizedMessage || ''}</textarea>
                             <div style="margin-top: 0.5rem;">
                                 <button class="btn btn-success btn-small" onclick="saveMessage(${index})">
                                     💾 Save Changes
@@ -854,7 +863,7 @@
             const textarea = document.getElementById('textarea-' + index);
             
             // Reset textarea to original message
-            textarea.value = currentMatches[index].personalizedMessage;
+            textarea.value = currentMatches[index].personalizedMessage || '';
             editor.style.display = 'none';
         }
 
@@ -877,14 +886,14 @@
             return message
                 // Remove only the specific problematic symbols
                 .replace(/[◇◆⟡]/g, '') 
-                .replace(/[\\u25C7\\u25C6]/g, '') 
+                .replace(/[\u25C7\u25C6]/g, '') 
                 // Remove any other geometric symbols that might cause issues
-                .replace(/[\\u2600-\\u26FF]/g, function(match) {
+                .replace(/[\u2600-\u26FF]/g, function(match) {
                     // Keep only these safe emojis
                     const safeEmojis = ['📞', '🏠', '🏢', '💰', '📍', '✨', '💡', '🎯', '📈', '⭐', '📄', '📸', '📊'];
                     return safeEmojis.includes(match) ? match : '';
                 })
-                .replace(/\\s+/g, ' ')
+                .replace(/\s+/g, ' ')
                 .trim();
         }
 
@@ -898,7 +907,7 @@
             sendBtn.disabled = true;
             
             // Clean and format phone number for WhatsApp
-            let cleanPhone = match.phone.replace(/[^\\d]/g, ''); // Remove all non-digits
+            let cleanPhone = (match.phone || '').replace(/[^\d]/g, ''); // Remove all non-digits
             
             // Ensure proper Singapore format
             if (cleanPhone.length === 8) {
@@ -914,7 +923,7 @@
             console.log(`Original phone: ${match.phone}, Cleaned: ${cleanPhone}`);
             
             // Clean the message for WhatsApp compatibility
-            const originalMessage = match.personalizedMessage;
+            const originalMessage = match.personalizedMessage || '';
             const cleanedMessage = cleanMessageForWhatsApp(originalMessage);
             
             console.log('Original message:', originalMessage);
