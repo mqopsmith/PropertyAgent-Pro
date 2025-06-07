@@ -643,12 +643,18 @@ Examples:
             showNotification('Message updated successfully', 'success');
         }
 
-        // Clean message for WhatsApp - keep it simple and working
+        // Simple approach: Strip out problematic characters entirely
         function cleanMessageForWhatsApp(message) {
             return message
-                .replace(/[◇◆⟡]/g, '') // Remove diamond symbols specifically
-                .replace(/[\u25C7\u25C6\u25CB\u25CF\u25A0\u25A1]/g, '') // Remove geometric shapes that cause issues
-                .replace(/[\uFE00-\uFE0F]/g, '') // Remove variation selectors
+                // Remove only the specific problematic symbols
+                .replace(/[◇◆⟡]/g, '') 
+                .replace(/[\u25C7\u25C6]/g, '') 
+                // Remove any other geometric symbols that might cause issues
+                .replace(/[\u2600-\u26FF]/g, function(match) {
+                    // Keep only these safe emojis
+                    const safeEmojis = ['📞', '🏠', '🏢', '💰', '📍', '✨', '💡', '🎯', '📈', '⭐'];
+                    return safeEmojis.includes(match) ? match : '';
+                })
                 .replace(/\s+/g, ' ')
                 .trim();
         }
@@ -678,14 +684,14 @@ Examples:
             
             console.log(`Original phone: ${match.phone}, Cleaned: ${cleanPhone}`);
             
-            // Clean the message for WhatsApp compatibility
+            // Clean the message for WhatsApp compatibility - much simpler approach
             const originalMessage = match.personalizedMessage;
             const cleanedMessage = cleanMessageForWhatsApp(originalMessage);
             
             console.log('Original message:', originalMessage);
             console.log('Cleaned message:', cleanedMessage);
             
-            // Create WhatsApp URL directly to the specific contact
+            // Simple URL encoding - no double encoding
             const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(cleanedMessage)}`;
             
             console.log(`Opening WhatsApp for ${match.name}: ${whatsappUrl}`);
