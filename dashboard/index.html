@@ -711,18 +711,20 @@
             isProcessing = true;
 
             try {
-                // Prepare request payload with Cloudinary file information
+                // FIXED: Wrap the payload in a 'body' object to match n8n expectations
                 const requestPayload = {
-                    action: 'match_leads',
-                    messageContent: messageContent,
-                    agentId: CONFIG.AGENT_ID,
-                    uploadedFiles: uploadedFiles.map(file => ({
-                        name: file.name,
-                        type: file.type,
-                        size: file.size,
-                        cloudinaryUrl: file.cloudinaryUrl,
-                        publicId: file.publicId
-                    }))
+                    body: {  // This is the fix - wrap everything in 'body'
+                        action: 'match_leads',
+                        messageContent: messageContent,
+                        agentId: CONFIG.AGENT_ID,
+                        uploadedFiles: uploadedFiles.map(file => ({
+                            name: file.name,
+                            type: file.type,
+                            size: file.size,
+                            cloudinaryUrl: file.cloudinaryUrl,
+                            publicId: file.publicId
+                        }))
+                    }
                 };
 
                 console.log('Sending request:', requestPayload);
@@ -976,7 +978,7 @@
             // Open WhatsApp directly to the contact with pre-filled message
             window.open(whatsappUrl, '_blank');
             
-            // Update backend to track message sent
+            // Update backend to track message sent - also wrap in body
             try {
                 await fetch(ENDPOINTS.SEND_MESSAGE, {
                     method: 'POST',
@@ -984,11 +986,13 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        action: 'message_sent',
-                        leadName: match.name,
-                        phone: match.phone,
-                        message: cleanedMessage,
-                        agentId: CONFIG.AGENT_ID
+                        body: {  // Wrap in body for consistency
+                            action: 'message_sent',
+                            leadName: match.name,
+                            phone: match.phone,
+                            message: cleanedMessage,
+                            agentId: CONFIG.AGENT_ID
+                        }
                     })
                 });
             } catch (error) {
@@ -1028,11 +1032,11 @@
         function checkSystemStatus() {
             const statusIndicator = document.getElementById('statusIndicator');
             
-            // Test n8n connectivity
+            // Test n8n connectivity - also wrap in body
             fetch(ENDPOINTS.MATCH_LEADS, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({action: 'health_check'})
+                body: JSON.stringify({body: {action: 'health_check'}})  // Wrap in body
             })
             .then(function(response) {
                 statusIndicator.innerHTML = '⚡ System Online';
