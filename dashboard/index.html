@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PropertyAgent Pro - Enhanced Dashboard</title>
-    <!-- Cloudflare Analytics Styles -->
-    <link rel="stylesheet" href="cloudflare-styles.css">
+    <title>PropertyAgent Pro - Cloudflare Only v2.0</title>
+    <!-- VERSION 2.0 - CLOUDFLARE TRACKING ONLY -->
+    <link rel="stylesheet" href="cloudflare-styles.css?v=2.0">
     <style>
         * {
             margin: 0;
@@ -42,6 +42,15 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+        }
+
+        .version-badge {
+            background: #8b5cf6;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
         }
 
         .user-info {
@@ -136,26 +145,26 @@
         }
 
         .upload-area {
-            border: 3px dashed #ddd;
+            border: 3px dashed #8b5cf6;
             border-radius: 15px;
             padding: 40px;
             text-align: center;
             transition: all 0.3s ease;
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f5e8 100%);
             margin-bottom: 20px;
             cursor: pointer;
         }
 
         .upload-area:hover {
             border-color: #667eea;
-            background: #e3f2fd;
+            background: linear-gradient(135deg, #e8f5e8 0%, #f8f9ff 100%);
             transform: scale(1.02);
         }
 
         .upload-icon {
             width: 60px;
             height: 60px;
-            background: #667eea;
+            background: #8b5cf6;
             border-radius: 50%;
             margin: 0 auto 20px;
             display: flex;
@@ -172,7 +181,7 @@
         }
 
         .upload-btn {
-            background: #667eea;
+            background: linear-gradient(135deg, #8b5cf6 0%, #667eea 100%);
             color: white;
             padding: 12px 24px;
             border: none;
@@ -180,12 +189,13 @@
             cursor: pointer;
             font-size: 1rem;
             transition: all 0.3s ease;
+            font-weight: 600;
         }
 
         .upload-btn:hover {
-            background: #5a6fd8;
+            background: linear-gradient(135deg, #7c3aed 0%, #5a6fd8 100%);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.3);
         }
 
         /* File Preview */
@@ -198,15 +208,16 @@
             align-items: center;
             gap: 15px;
             padding: 15px;
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f5e8 100%);
             border-radius: 10px;
             margin-bottom: 10px;
+            border: 2px solid #8b5cf6;
         }
 
         .file-icon {
             width: 40px;
             height: 40px;
-            background: #4CAF50;
+            background: #8b5cf6;
             border-radius: 8px;
             display: flex;
             align-items: center;
@@ -250,6 +261,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            font-weight: 600;
         }
 
         .stats-btn {
@@ -469,15 +481,16 @@
         .example-prompts {
             margin-top: 1rem;
             padding: 1rem;
-            background: #f8f9ff;
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f5e8 100%);
             border-radius: 8px;
-            border-left: 3px solid #667eea;
+            border-left: 3px solid #8b5cf6;
         }
 
         .example-prompts h4 {
-            color: #667eea;
+            color: #8b5cf6;
             margin-bottom: 0.5rem;
             font-size: 0.9rem;
+            font-weight: 600;
         }
 
         .example-list {
@@ -511,7 +524,7 @@
     <div class="header">
         <div class="header-content">
             <div class="logo">
-                🏠 PropertyAgent Pro
+                🏠 PropertyAgent Pro <span class="version-badge">v2.0 CF</span>
             </div>
             <div class="user-info">
                 <button class="analytics-btn" onclick="showFileAnalytics()">📊 Analytics</button>
@@ -544,18 +557,18 @@
                 <!-- File Upload Section -->
                 <div class="file-upload-section">
                     <label><strong>📎 Attachments (Optional)</strong></label>
-                    <div class="upload-area" id="uploadArea" onclick="handleFileUpload()">
-                        <div class="upload-icon">☁️</div>
+                    <div class="upload-area" id="uploadArea" onclick="triggerCloudflareUpload()">
+                        <div class="upload-icon">🎯</div>
                         <div class="upload-text">
-                            Click to upload files with tracking<br>
-                            <small>Images, PDFs, Brochures, Market Reports (Max 50MB each)</small>
+                            <strong>Cloudflare Tracking Upload</strong><br>
+                            <small>Click to upload files with tracking (Images, PDFs, Documents - Max 50MB each)</small>
                         </div>
-                        <button type="button" class="upload-btn" onclick="handleFileUpload()">
-                            📁 Upload with Tracking
+                        <button type="button" class="upload-btn" onclick="triggerCloudflareUpload()">
+                            🎯 Upload to Cloudflare
                         </button>
                     </div>
                     <div id="filePreview" class="file-preview"></div>
-                    <!-- Hidden file input for direct upload -->
+                    <!-- Hidden file input -->
                     <input type="file" id="fileInput" multiple style="display: none;" accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,text/*">
                 </div>
                 
@@ -563,18 +576,18 @@
                     <button class="btn btn-primary" id="findMatchesBtn" onclick="findMatchingLeads()">
                         🔍 Find Relevant Leads
                     </button>
-                    <button class="btn btn-secondary" onclick="clearInput()">
+                    <button class="btn btn-secondary" onclick="clearAll()">
                         🗑️ Clear All
                     </button>
                 </div>
 
                 <div class="example-prompts">
-                    <h4>💡 Enhanced Capabilities:</h4>
+                    <h4>🎯 Cloudflare Tracking Features:</h4>
                     <div class="example-list">
-                        • <strong>Cloudflare Tracking:</strong> All files uploaded with click tracking enabled<br>
-                        • <strong>PDF Support:</strong> Works perfectly for all file types<br>
-                        • <strong>Smart Ranking:</strong> AI analyzes content and ranks all leads by relevance<br>
-                        • <strong>Analytics Dashboard:</strong> See who engages with your files
+                        • <strong>100% Tracking:</strong> Every file uploaded gets click tracking URLs<br>
+                        • <strong>No Cloudinary:</strong> Pure Cloudflare infrastructure for better performance<br>
+                        • <strong>PDF Support:</strong> Works perfectly with all document types<br>
+                        • <strong>Real-time Analytics:</strong> See who views your files instantly
                     </div>
                 </div>
             </div>
@@ -598,12 +611,15 @@
     <div id="notification" class="notification"></div>
 
     <script>
+        // CLOUDFLARE-ONLY VERSION 2.0
+        console.log('🎯 PropertyAgent Pro v2.0 - Cloudflare Tracking Only');
+        
         // Global variables
         let uploadedFiles = [];
         let isProcessing = false;
         let currentMatches = [];
 
-        // Configuration - Cloudflare ONLY
+        // Configuration - CLOUDFLARE ONLY
         const CONFIG = {
             N8N_BASE_URL: 'https://n8n.opsmith.biz/webhook',
             AGENT_ID: 'sarah-lim-001',
@@ -615,67 +631,66 @@
             SEND_MESSAGE: CONFIG.N8N_BASE_URL + '/send-message'
         };
 
-        // Primary upload function - Cloudflare ONLY
-        async function handleFileUpload() {
+        // CLOUDFLARE UPLOAD ONLY
+        async function triggerCloudflareUpload() {
+            console.log('🎯 Triggering Cloudflare upload');
             document.getElementById('fileInput').click();
         }
 
-        // Cloudflare upload function
+        // Cloudflare upload function - ONLY OPTION
         async function uploadToCloudflare(file) {
-            const messageId = `msg_${Date.now()}`;
+            console.log('🎯 Starting Cloudflare upload for:', file.name);
+            
+            const messageId = `cf_msg_${Date.now()}`;
             const formData = new FormData();
             formData.append('file', file);
             formData.append('agentId', CONFIG.AGENT_ID);
             formData.append('messageId', messageId);
 
-            try {
-                const response = await fetch(`${CONFIG.CLOUDFLARE_WORKER_URL}/upload`, {
-                    method: 'POST',
-                    body: formData
-                });
+            const response = await fetch(`${CONFIG.CLOUDFLARE_WORKER_URL}/upload`, {
+                method: 'POST',
+                body: formData
+            });
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Upload failed: ${response.status} ${response.statusText} - ${errorText}`);
-                }
-
-                const result = await response.json();
-                
-                return {
-                    name: result.originalName || file.name,
-                    type: getFileTypeFromMime(file.type),
-                    size: result.fileSize || file.size,
-                    cloudinaryUrl: result.trackingUrl, // Use tracking URL as primary URL
-                    trackingUrl: result.trackingUrl,
-                    trackingId: result.trackingId,
-                    publicId: result.trackingId,
-                    format: getFormatFromMime(file.type),
-                    uploadedAt: new Date().toISOString(),
-                    uploadMethod: 'cloudflare'
-                };
-            } catch (error) {
-                console.error('🚨 Cloudflare upload failed:', error);
-                throw error;
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Cloudflare upload failed: ${response.status} ${response.statusText} - ${errorText}`);
             }
+
+            const result = await response.json();
+            console.log('✅ Cloudflare upload successful:', result);
+            
+            return {
+                name: result.originalName || file.name,
+                type: getFileTypeFromMime(file.type),
+                size: result.fileSize || file.size,
+                cloudinaryUrl: result.trackingUrl, // Always tracking URL
+                trackingUrl: result.trackingUrl,
+                trackingId: result.trackingId,
+                publicId: result.trackingId,
+                format: getFormatFromMime(file.type),
+                uploadedAt: new Date().toISOString(),
+                uploadMethod: 'cloudflare' // ALWAYS CLOUDFLARE
+            };
         }
 
-        // File input change handler - Cloudflare ONLY
+        // File input handler - CLOUDFLARE ONLY
         document.getElementById('fileInput').addEventListener('change', async function(event) {
             const files = Array.from(event.target.files);
+            console.log('📁 Files selected:', files.length);
             
             for (const file of files) {
                 if (validateFile(file)) {
                     try {
-                        showNotification(`📤 Uploading ${file.name} to Cloudflare...`, 'info');
+                        showNotification(`🎯 Uploading ${file.name} to Cloudflare...`, 'info');
                         
-                        // Upload to Cloudflare with tracking
                         const uploadResult = await uploadToCloudflare(file);
-                        console.log('✅ Cloudflare upload successful with tracking:', uploadResult);
+                        console.log('✅ File uploaded successfully:', uploadResult);
                         
                         uploadedFiles.push(uploadResult);
                         updateFilePreview();
                         
-                        showNotification(`✅ ${file.name} uploaded with tracking enabled!`, 'success');
+                        showNotification(`✅ ${file.name} uploaded with tracking!`, 'success');
                         
                     } catch (error) {
                         console.error('❌ Upload failed:', error);
@@ -684,11 +699,9 @@
                 }
             }
             
-            // Reset file input
             event.target.value = '';
         });
 
-        // File validation
         function validateFile(file) {
             const maxSize = 50 * 1024 * 1024; // 50MB
             const allowedTypes = [
@@ -714,7 +727,6 @@
             return true;
         }
 
-        // Helper functions
         function getFileTypeFromMime(mimeType) {
             if (mimeType.startsWith('image/')) return 'image';
             if (mimeType === 'application/pdf') return 'pdf';
@@ -748,7 +760,7 @@
                         <div class="file-name">${file.name}</div>
                         <div class="file-size">${formatFileSize(file.size)}</div>
                         <div class="cloud-upload-status">
-                            📊 Tracking enabled
+                            🎯 Cloudflare Tracking Active
                             <button onclick="showFileStats('${file.trackingId}')" class="stats-btn">📊 Stats</button>
                         </div>
                     </div>
@@ -779,7 +791,6 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        // Analytics functions
         async function showFileAnalytics() {
             try {
                 showNotification('Loading analytics...', 'info');
@@ -815,7 +826,6 @@
         }
 
         function displayAnalyticsDashboard(analytics) {
-            // Remove existing modal if any
             const existingModal = document.querySelector('.analytics-modal');
             if (existingModal) existingModal.remove();
 
@@ -823,7 +833,7 @@
             modal.className = 'analytics-modal';
             modal.innerHTML = `
                 <div class="analytics-content">
-                    <h2>📊 PropertyAgent Pro Analytics</h2>
+                    <h2>🎯 PropertyAgent Pro Analytics</h2>
                     
                     <div class="analytics-stats">
                         <div class="stat">
@@ -900,8 +910,8 @@
             document.body.appendChild(modal);
         }
 
-        // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎯 PropertyAgent Pro v2.0 Cloudflare-Only Initialized');
             checkSystemStatus();
         });
 
@@ -917,7 +927,6 @@
 
             if (isProcessing) return;
 
-            // Update UI
             const originalText = btn.innerHTML;
             btn.innerHTML = '<div class="spinner"></div> Analyzing Message & Finding Leads...';
             btn.disabled = true;
@@ -933,7 +942,7 @@
                             name: file.name,
                             type: file.type,
                             size: file.size,
-                            cloudinaryUrl: file.trackingUrl, // Always use tracking URL
+                            cloudinaryUrl: file.trackingUrl,
                             publicId: file.trackingId,
                             trackingUrl: file.trackingUrl,
                             trackingId: file.trackingId,
@@ -942,7 +951,7 @@
                     }
                 };
 
-                console.log('Sending request with Cloudflare tracking URLs:', requestPayload);
+                console.log('🎯 Sending request with Cloudflare tracking URLs:', requestPayload);
 
                 const response = await fetch(ENDPOINTS.MATCH_LEADS, {
                     method: 'POST',
@@ -991,7 +1000,7 @@
                     displayMatches(result);
                     
                     const fileCount = uploadedFiles.length;
-                    const fileMsg = fileCount > 0 ? ` with ${fileCount} tracked file${fileCount > 1 ? 's' : ''}` : '';
+                    const fileMsg = fileCount > 0 ? ` with ${fileCount} Cloudflare-tracked file${fileCount > 1 ? 's' : ''}` : '';
                     showNotification(`Found ${result.matches.length} leads ranked by relevance${fileMsg}!`, 'success');
                 } else {
                     console.error('Unexpected result format:', result);
@@ -1021,10 +1030,10 @@
             const coldCount = result.matches.filter(m => (m.matchScore || m.relevanceScore) < 60).length;
             
             const fileInfo = uploadedFiles.length > 0 ? 
-                `<div style="margin-top: 1rem;"><strong>📊 ${uploadedFiles.length} file${uploadedFiles.length > 1 ? 's' : ''} uploaded</strong> (all with click tracking)</div>` : '';
+                `<div style="margin-top: 1rem;"><strong>🎯 ${uploadedFiles.length} file${uploadedFiles.length > 1 ? 's' : ''} uploaded</strong> (all with Cloudflare tracking)</div>` : '';
 
             matchesSummary.innerHTML = `
-                <h3 style="color: #2c3e50; margin-bottom: 1rem;">📊 Lead Relevance Analysis</h3>
+                <h3 style="color: #2c3e50; margin-bottom: 1rem;">🎯 Lead Relevance Analysis</h3>
                 <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
                     <div><strong>${result.matches.length}</strong> total leads ranked</div>
                     <div><strong style="color: #c62828;">${hotCount}</strong> highly relevant (80%+)</div>
@@ -1041,7 +1050,7 @@
                 const scoreLabel = score >= 80 ? 'HIGH' : 
                                  score >= 60 ? 'MEDIUM' : 'LOW';
 
-                const trackingText = uploadedFiles.length > 0 ? ' (with click tracking)' : '';
+                const trackingText = uploadedFiles.length > 0 ? ' (with Cloudflare tracking)' : '';
 
                 return `
                     <div class="lead-match-card">
@@ -1188,12 +1197,13 @@
             }, 2000);
         }
 
-        function clearInput() {
+        function clearAll() {
             document.getElementById('messageInput').value = '';
             document.getElementById('matchesSection').style.display = 'none';
             uploadedFiles = [];
             updateFilePreview();
             currentMatches = [];
+            showNotification('All content cleared', 'info');
         }
 
         function showNotification(message, type) {
@@ -1210,7 +1220,6 @@
         function checkSystemStatus() {
             const statusIndicator = document.getElementById('statusIndicator');
             
-            // Test n8n connectivity
             fetch(ENDPOINTS.MATCH_LEADS, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
