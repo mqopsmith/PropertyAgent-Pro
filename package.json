@@ -1,12 +1,13 @@
 {
-  "name": "property-agent-pro",
-  "version": "1.0.0",
-  "private": true,
+  "name": "propertyagent-pro",
+  "version": "2.0.0",
+  "description": "PropertyAgent Pro - WhatsApp Marketing Automation for Singapore Real Estate",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && next export",
     "start": "next start",
-    "lint": "next lint"
+    "export": "next export",
+    "cloudflare": "wrangler pages publish dist"
   },
   "dependencies": {
     "next": "^14.0.0",
@@ -14,7 +15,6 @@
     "react-dom": "^18.0.0"
   },
   "devDependencies": {
-    "eslint": "^8.0.0",
-    "eslint-config-next": "^14.0.0"
+    "wrangler": "^3.0.0"
   }
 }
