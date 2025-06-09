@@ -1,2 +1,1 @@
-# This file has been removed
-# Sentry integration was removed to resolve build conflicts
+# This file will be removed in cleanup
