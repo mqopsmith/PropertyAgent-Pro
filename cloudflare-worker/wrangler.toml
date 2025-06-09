@@ -1,0 +1,14 @@
+name = "propertyagent-pro-tracker"
+main = "src/worker.js"
+compatibility_date = "2024-01-01"
+
+# R2 bucket binding for PropertyAgent Pro files
+[[r2_buckets]]
+binding = "PROPERTYAGENT_FILES"
+bucket_name = "propertyagent-pro-files"
+
+# KV namespace binding for tracking data
+[[kv_namespaces]]
+binding = "PROPERTYAGENT_TRACKING"
+id = "760eaa533789443ab21281e01171e300"
+preview_id = "760eaa533789443ab21281e01171e300"
