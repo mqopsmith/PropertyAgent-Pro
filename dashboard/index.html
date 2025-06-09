@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PropertyAgent Pro - Enhanced Dashboard</title>
-    <!-- Keep Cloudinary as fallback -->
-    <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
     <!-- Cloudflare Analytics Styles -->
     <link rel="stylesheet" href="cloudflare-styles.css">
     <style>
@@ -243,8 +241,8 @@
         }
 
         .cloud-upload-status {
-            background: #e8f5e8;
-            color: #2e7d32;
+            background: #8b5cf6;
+            color: white;
             padding: 8px 12px;
             border-radius: 6px;
             font-size: 0.85rem;
@@ -255,7 +253,7 @@
         }
 
         .stats-btn {
-            background: #8b5cf6;
+            background: rgba(255, 255, 255, 0.2);
             color: white;
             border: none;
             padding: 4px 8px;
@@ -573,8 +571,8 @@
                 <div class="example-prompts">
                     <h4>💡 Enhanced Capabilities:</h4>
                     <div class="example-list">
-                        • <strong>Cloudflare Tracking:</strong> Files uploaded with click tracking enabled<br>
-                        • <strong>PDF Support:</strong> Finally works perfectly for all file types<br>
+                        • <strong>Cloudflare Tracking:</strong> All files uploaded with click tracking enabled<br>
+                        • <strong>PDF Support:</strong> Works perfectly for all file types<br>
                         • <strong>Smart Ranking:</strong> AI analyzes content and ranks all leads by relevance<br>
                         • <strong>Analytics Dashboard:</strong> See who engages with your files
                     </div>
@@ -605,13 +603,11 @@
         let isProcessing = false;
         let currentMatches = [];
 
-        // Configuration - Cloudflare first, direct Cloudinary API fallback
+        // Configuration - Cloudflare ONLY
         const CONFIG = {
             N8N_BASE_URL: 'https://n8n.opsmith.biz/webhook',
             AGENT_ID: 'sarah-lim-001',
-            CLOUDFLARE_WORKER_URL: 'https://propertyagent-pro-tracker.mingquan.workers.dev',
-            CLOUDINARY_CLOUD_NAME: 'dvgfjpjot',
-            CLOUDINARY_UPLOAD_PRESET: 'property-agent-files'
+            CLOUDFLARE_WORKER_URL: 'https://propertyagent-pro-tracker.mingquan.workers.dev'
         };
 
         const ENDPOINTS = {
@@ -619,7 +615,7 @@
             SEND_MESSAGE: CONFIG.N8N_BASE_URL + '/send-message'
         };
 
-        // Primary upload function - tries Cloudflare first, falls back to Cloudinary
+        // Primary upload function - Cloudflare ONLY
         async function handleFileUpload() {
             document.getElementById('fileInput').click();
         }
@@ -639,7 +635,8 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
+                    const errorText = await response.text();
+                    throw new Error(`Upload failed: ${response.status} ${response.statusText} - ${errorText}`);
                 }
 
                 const result = await response.json();
@@ -657,81 +654,31 @@
                     uploadMethod: 'cloudflare'
                 };
             } catch (error) {
-                console.error('Cloudflare upload failed:', error);
+                console.error('🚨 Cloudflare upload failed:', error);
                 throw error;
             }
         }
 
-        // Direct Cloudinary API upload (no widget)
-        async function uploadToCloudinary(file) {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', CONFIG.CLOUDINARY_UPLOAD_PRESET);
-            formData.append('folder', `property-agent-pro/session-${Date.now()}`);
-
-            try {
-                const response = await fetch(`https://api.cloudinary.com/v1_1/${CONFIG.CLOUDINARY_CLOUD_NAME}/auto/upload`, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Cloudinary upload failed: ${response.statusText}`);
-                }
-
-                const result = await response.json();
-                
-                // Fix PDF URLs
-                let fileUrl = result.secure_url;
-                if (result.format === 'pdf' && fileUrl.includes('/image/')) {
-                    fileUrl = fileUrl.replace('/image/', '/raw/');
-                }
-                
-                return {
-                    name: (result.original_filename || file.name.split('.')[0]) + '.' + (result.format || 'unknown'),
-                    type: result.resource_type,
-                    size: result.bytes,
-                    cloudinaryUrl: fileUrl,
-                    publicId: result.public_id,
-                    format: result.format,
-                    uploadedAt: new Date().toISOString(),
-                    uploadMethod: 'cloudinary'
-                };
-            } catch (error) {
-                console.error('Cloudinary direct upload failed:', error);
-                throw error;
-            }
-        }
-
-        // File input change handler
+        // File input change handler - Cloudflare ONLY
         document.getElementById('fileInput').addEventListener('change', async function(event) {
             const files = Array.from(event.target.files);
             
             for (const file of files) {
                 if (validateFile(file)) {
                     try {
-                        showNotification(`Uploading ${file.name}...`, 'info');
+                        showNotification(`📤 Uploading ${file.name} to Cloudflare...`, 'info');
                         
-                        // Try Cloudflare first
-                        let uploadResult;
-                        try {
-                            uploadResult = await uploadToCloudflare(file);
-                            console.log('✅ Cloudflare upload successful:', uploadResult);
-                        } catch (cloudflareError) {
-                            console.warn('⚠️ Cloudflare failed, trying Cloudinary:', cloudflareError);
-                            // Fallback to direct Cloudinary API
-                            uploadResult = await uploadToCloudinary(file);
-                            console.log('✅ Cloudinary fallback successful:', uploadResult);
-                        }
+                        // Upload to Cloudflare with tracking
+                        const uploadResult = await uploadToCloudflare(file);
+                        console.log('✅ Cloudflare upload successful with tracking:', uploadResult);
                         
                         uploadedFiles.push(uploadResult);
                         updateFilePreview();
                         
-                        const method = uploadResult.uploadMethod === 'cloudflare' ? 'Cloudflare (with tracking)' : 'Cloudinary (fallback)';
-                        showNotification(`✅ ${file.name} uploaded via ${method}!`, 'success');
+                        showNotification(`✅ ${file.name} uploaded with tracking enabled!`, 'success');
                         
                     } catch (error) {
-                        console.error('❌ All upload methods failed:', error);
+                        console.error('❌ Upload failed:', error);
                         showNotification(`❌ Failed to upload ${file.name}: ${error.message}`, 'error');
                     }
                 }
@@ -795,18 +742,14 @@
                 const fileItem = document.createElement('div');
                 fileItem.className = 'file-item';
                 
-                const isTracked = file.uploadMethod === 'cloudflare' && file.trackingUrl;
-                const statusText = isTracked ? '📊 Tracking enabled' : '☁️ Cloud hosted';
-                const statusColor = isTracked ? '#8b5cf6' : '#2e7d32';
-                
                 fileItem.innerHTML = `
                     <div class="file-icon">${getFileIcon(file.type)}</div>
                     <div class="file-info">
                         <div class="file-name">${file.name}</div>
                         <div class="file-size">${formatFileSize(file.size)}</div>
-                        <div class="cloud-upload-status" style="background: ${statusColor}; color: white;">
-                            ${statusText}
-                            ${isTracked ? `<button onclick="showFileStats('${file.trackingId}')" class="stats-btn">📊 Stats</button>` : ''}
+                        <div class="cloud-upload-status">
+                            📊 Tracking enabled
+                            <button onclick="showFileStats('${file.trackingId}')" class="stats-btn">📊 Stats</button>
                         </div>
                     </div>
                     <button type="button" class="remove-file" onclick="removeFile(${index})" title="Remove file">×</button>
@@ -990,16 +933,16 @@
                             name: file.name,
                             type: file.type,
                             size: file.size,
-                            cloudinaryUrl: file.cloudinaryUrl || file.trackingUrl,
-                            publicId: file.publicId || file.trackingId,
+                            cloudinaryUrl: file.trackingUrl, // Always use tracking URL
+                            publicId: file.trackingId,
                             trackingUrl: file.trackingUrl,
                             trackingId: file.trackingId,
-                            uploadMethod: file.uploadMethod
+                            uploadMethod: 'cloudflare'
                         }))
                     }
                 };
 
-                console.log('Sending request:', requestPayload);
+                console.log('Sending request with Cloudflare tracking URLs:', requestPayload);
 
                 const response = await fetch(ENDPOINTS.MATCH_LEADS, {
                     method: 'POST',
@@ -1048,8 +991,7 @@
                     displayMatches(result);
                     
                     const fileCount = uploadedFiles.length;
-                    const trackingCount = uploadedFiles.filter(f => f.uploadMethod === 'cloudflare').length;
-                    const fileMsg = fileCount > 0 ? ` with ${fileCount} file${fileCount > 1 ? 's' : ''} (${trackingCount} tracked)` : '';
+                    const fileMsg = fileCount > 0 ? ` with ${fileCount} tracked file${fileCount > 1 ? 's' : ''}` : '';
                     showNotification(`Found ${result.matches.length} leads ranked by relevance${fileMsg}!`, 'success');
                 } else {
                     console.error('Unexpected result format:', result);
@@ -1078,9 +1020,8 @@
             }).length;
             const coldCount = result.matches.filter(m => (m.matchScore || m.relevanceScore) < 60).length;
             
-            const trackingCount = uploadedFiles.filter(f => f.uploadMethod === 'cloudflare').length;
             const fileInfo = uploadedFiles.length > 0 ? 
-                `<div style="margin-top: 1rem;"><strong>📊 ${uploadedFiles.length} file${uploadedFiles.length > 1 ? 's' : ''} uploaded</strong> (${trackingCount} with click tracking)</div>` : '';
+                `<div style="margin-top: 1rem;"><strong>📊 ${uploadedFiles.length} file${uploadedFiles.length > 1 ? 's' : ''} uploaded</strong> (all with click tracking)</div>` : '';
 
             matchesSummary.innerHTML = `
                 <h3 style="color: #2c3e50; margin-bottom: 1rem;">📊 Lead Relevance Analysis</h3>
@@ -1100,8 +1041,7 @@
                 const scoreLabel = score >= 80 ? 'HIGH' : 
                                  score >= 60 ? 'MEDIUM' : 'LOW';
 
-                const hasTracking = uploadedFiles.some(f => f.uploadMethod === 'cloudflare');
-                const trackingText = hasTracking ? ' (with click tracking)' : '';
+                const trackingText = uploadedFiles.length > 0 ? ' (with click tracking)' : '';
 
                 return `
                     <div class="lead-match-card">
