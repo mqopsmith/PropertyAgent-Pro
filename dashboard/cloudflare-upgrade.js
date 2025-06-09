@@ -1,10 +1,10 @@
 // PropertyAgent Pro - Cloudflare File Handling Upgrade
 // Replace the existing Cloudinary functionality with this code
 
-// NEW CONFIGURATION - Replace in your index.html
+// UPDATED CONFIGURATION with your deployed worker URL
 const CONFIG_CLOUDFLARE = {
-    // Replace with your actual Cloudflare Worker URL after deployment
-    CLOUDFLARE_WORKER_URL: 'https://propertyagent-pro-tracker.YOUR_USERNAME.workers.dev',
+    // Your deployed Cloudflare Worker URL
+    CLOUDFLARE_WORKER_URL: 'https://propertyagent-pro-tracker.mingquan.workers.dev',
     N8N_BASE_URL: 'https://n8n.opsmith.biz/webhook',
     AGENT_ID: 'sarah-lim-001'
 };
