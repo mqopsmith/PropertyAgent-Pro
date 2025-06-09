@@ -53,6 +53,23 @@
             gap: 1rem;
         }
 
+        .analytics-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .analytics-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
         .status-indicator {
             padding: 0.3rem 0.8rem;
             border-radius: 20px;
@@ -232,6 +249,20 @@
             border-radius: 6px;
             font-size: 0.85rem;
             margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stats-btn {
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            margin-left: auto;
         }
 
         .action-buttons {
@@ -485,7 +516,7 @@
                 🏠 PropertyAgent Pro
             </div>
             <div class="user-info">
-                <!-- Analytics button will be added here by JavaScript -->
+                <button class="analytics-btn" onclick="showFileAnalytics()">📊 Analytics</button>
                 <div class="status-indicator" id="statusIndicator">⚡ System Online</div>
                 <span>Sarah Lim - ERA Singapore</span>
                 <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">SL</div>
@@ -526,7 +557,7 @@
                         </button>
                     </div>
                     <div id="filePreview" class="file-preview"></div>
-                    <!-- Hidden file input for Cloudflare upload -->
+                    <!-- Hidden file input for direct upload -->
                     <input type="file" id="fileInput" multiple style="display: none;" accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,text/*">
                 </div>
                 
@@ -574,7 +605,7 @@
         let isProcessing = false;
         let currentMatches = [];
 
-        // UPDATED Configuration - Cloudflare first, Cloudinary fallback
+        // Configuration - Cloudflare first, Cloudinary fallback
         const CONFIG = {
             N8N_BASE_URL: 'https://n8n.opsmith.biz/webhook',
             AGENT_ID: 'sarah-lim-001',
@@ -634,54 +665,52 @@
         // Cloudinary fallback function
         async function uploadToCloudinary(file) {
             return new Promise((resolve, reject) => {
-                // Initialize Cloudinary widget if not exists
-                if (!window.cloudinaryWidget) {
-                    window.cloudinaryWidget = cloudinary.createUploadWidget({
-                        cloudName: CONFIG.CLOUDINARY_CLOUD_NAME,
-                        uploadPreset: CONFIG.CLOUDINARY_UPLOAD_PRESET,
-                        folder: `property-agent-pro/session-${Date.now()}`,
-                        resourceType: 'auto',
-                        maxFileSize: 25000000, // 25MB
-                        sources: ['local'],
-                        multiple: false,
-                        clientAllowedFormats: ['jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx', 'xls', 'xlsx'],
-                        showUploadMoreButton: false,
-                        theme: 'minimal'
-                    }, (error, result) => {
-                        if (!error && result && result.event === "success") {
-                            let fileUrl = result.info.secure_url;
-                            
-                            // Fix PDF URLs
-                            if (result.info.format === 'pdf' && fileUrl.includes('/image/')) {
-                                fileUrl = fileUrl.replace('/image/', '/raw/');
-                            }
-                            
-                            const fileData = {
-                                name: result.info.original_filename + '.' + result.info.format,
-                                type: result.info.resource_type,
-                                size: result.info.bytes,
-                                cloudinaryUrl: fileUrl,
-                                publicId: result.info.public_id,
-                                format: result.info.format,
-                                uploadedAt: new Date().toISOString(),
-                                uploadMethod: 'cloudinary'
-                            };
-                            
-                            resolve(fileData);
+                // Initialize Cloudinary widget
+                const widget = cloudinary.createUploadWidget({
+                    cloudName: CONFIG.CLOUDINARY_CLOUD_NAME,
+                    uploadPreset: CONFIG.CLOUDINARY_UPLOAD_PRESET,
+                    folder: `property-agent-pro/session-${Date.now()}`,
+                    resourceType: 'auto',
+                    maxFileSize: 25000000, // 25MB
+                    sources: ['local'],
+                    multiple: false,
+                    clientAllowedFormats: ['jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx', 'xls', 'xlsx'],
+                    showUploadMoreButton: false,
+                    theme: 'minimal'
+                }, (error, result) => {
+                    if (!error && result && result.event === "success") {
+                        let fileUrl = result.info.secure_url;
+                        
+                        // Fix PDF URLs
+                        if (result.info.format === 'pdf' && fileUrl.includes('/image/')) {
+                            fileUrl = fileUrl.replace('/image/', '/raw/');
                         }
                         
-                        if (error) {
-                            reject(new Error('Cloudinary upload failed: ' + error.message));
-                        }
-                    });
-                }
+                        const fileData = {
+                            name: result.info.original_filename + '.' + result.info.format,
+                            type: result.info.resource_type,
+                            size: result.info.bytes,
+                            cloudinaryUrl: fileUrl,
+                            publicId: result.info.public_id,
+                            format: result.info.format,
+                            uploadedAt: new Date().toISOString(),
+                            uploadMethod: 'cloudinary'
+                        };
+                        
+                        resolve(fileData);
+                    }
+                    
+                    if (error) {
+                        reject(new Error('Cloudinary upload failed: ' + error.message));
+                    }
+                });
 
-                // Upload the specific file
-                window.cloudinaryWidget.open();
+                // Trigger upload for this specific file
+                widget.open();
             });
         }
 
-        // File input change handler
+        // File input change handler - FIXED IMPLEMENTATION
         document.getElementById('fileInput').addEventListener('change', async function(event) {
             const files = Array.from(event.target.files);
             
@@ -935,22 +964,9 @@
             document.body.appendChild(modal);
         }
 
-        // Add analytics button to header
-        function addAnalyticsButton() {
-            const userInfo = document.querySelector('.user-info');
-            if (userInfo && !document.querySelector('.analytics-btn')) {
-                const analyticsBtn = document.createElement('button');
-                analyticsBtn.textContent = '📊 Analytics';
-                analyticsBtn.className = 'analytics-btn';
-                analyticsBtn.onclick = showFileAnalytics;
-                userInfo.insertBefore(analyticsBtn, userInfo.firstChild);
-            }
-        }
-
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
             checkSystemStatus();
-            addAnalyticsButton();
         });
 
         async function findMatchingLeads() {
@@ -1175,12 +1191,12 @@
         function cleanMessageForWhatsApp(message) {
             return message
                 .replace(/[◇◆⟡]/g, '') 
-                .replace(/[\u25C7\u25C6]/g, '') 
-                .replace(/[\u2600-\u26FF]/g, function(match) {
+                .replace(/[\\u25C7\\u25C6]/g, '') 
+                .replace(/[\\u2600-\\u26FF]/g, function(match) {
                     const safeEmojis = ['📞', '🏠', '🏢', '💰', '📍', '✨', '💡', '🎯', '📈', '⭐', '📄', '📸', '📊'];
                     return safeEmojis.includes(match) ? match : '';
                 })
-                .replace(/\s+/g, ' ')
+                .replace(/\\s+/g, ' ')
                 .trim();
         }
 
@@ -1192,7 +1208,7 @@
             sendBtn.innerHTML = '📱 Opening WhatsApp...';
             sendBtn.disabled = true;
             
-            let cleanPhone = (match.phone || '').replace(/[^\d]/g, '');
+            let cleanPhone = (match.phone || '').replace(/[^\\d]/g, '');
             
             if (cleanPhone.length === 8) {
                 cleanPhone = '65' + cleanPhone;
