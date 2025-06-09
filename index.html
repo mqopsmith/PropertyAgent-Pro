@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PropertyAgent Pro - Cloudflare Only v2.0</title>
+    <!-- VERSION 2.0 - CLOUDFLARE TRACKING ONLY -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .version-badge {
+            background: #8b5cf6;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .user-info {
+            color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .analytics-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .analytics-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .status-indicator {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(46, 204, 113, 0.2);
+            color: #27ae60;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .main-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .property-input-section {
+            margin-bottom: 2rem;
+        }
+
+        .property-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 1.5rem;
+            border: 2px solid #e8f2ff;
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .property-input:focus {
+            border-color: #667eea;
+        }
+
+        .property-input::placeholder {
+            color: #888;
+            line-height: 1.5;
+        }
+
+        /* File Upload Styles */
+        .file-upload-section {
+            margin: 1.5rem 0;
+        }
+
+        .upload-area {
+            border: 3px dashed #8b5cf6;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f5e8 100%);
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #e8f5e8 0%, #f8f9ff 100%);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            width: 60px;
+            height: 60px;
+            background: #8b5cf6;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #8b5cf6 0%, #667eea 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .upload-btn:hover {
+            background: linear-gradient(135deg, #7c3aed 0%, #5a6fd8 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.3);
+        }
+
+        /* File Preview */
+        .file-preview {
+            margin-top: 20px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f5e8 100%);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 2px solid #8b5cf6;
+        }
+
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            background: #8b5cf6;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .file-size {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .remove-file {
+            background: #f44336;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .cloud-upload-status {
+            background: #8b5cf6;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
+        .stats-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            margin-left: auto;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success { background: #27ae60; }
+        .notification.error { background: #e74c3c; }
+        .notification.info { background: #3498db; }
+
+        .example-prompts {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f5e8 100%);
+            border-radius: 8px;
+            border-left: 3px solid #8b5cf6;
+        }
+
+        .example-prompts h4 {
+            color: #8b5cf6;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .example-list {
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .upload-area {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                🏠 PropertyAgent Pro <span class="version-badge">v2.0 CF</span>
+            </div>
+            <div class="user-info">
+                <button class="analytics-btn" onclick="showFileAnalytics()">📊 Analytics</button>
+                <div class="status-indicator" id="statusIndicator">⚡ System Online</div>
+                <span>Sarah Lim - ERA Singapore</span>
+                <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">SL</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="main-panel">
+            <!-- Property Input Section -->
+            <div class="property-input-section">
+                <h2 class="section-title">✏️ Create Your Message</h2>
+                <textarea 
+                    class="property-input" 
+                    id="messageInput" 
+                    placeholder="Write your message here... This could be:
+
+• Property Listing: 'New Marina Bay luxury condo - 3BR/2BA, $2.3M, stunning bay views, immediate occupancy'
+
+• Market Update: 'Weekly Singapore property market update: CBD condo prices up 8% this quarter, new launches showing strong demand...'
+
+• Newsletter: 'Investment opportunities in emerging districts, rental yields holding steady at 3-4%...'
+
+• General Content: Any property-related message you want to share with relevant leads"
+                ></textarea>
+                
+                <!-- File Upload Section -->
+                <div class="file-upload-section">
+                    <label><strong>📎 Attachments (Optional)</strong></label>
+                    <div class="upload-area" id="uploadArea" onclick="triggerCloudflareUpload()">
+                        <div class="upload-icon">🎯</div>
+                        <div class="upload-text">
+                            <strong>Cloudflare Tracking Upload</strong><br>
+                            <small>Click to upload files with tracking (Images, PDFs, Documents - Max 50MB each)</small>
+                        </div>
+                        <button type="button" class="upload-btn" onclick="triggerCloudflareUpload()">
+                            🎯 Upload to Cloudflare
+                        </button>
+                    </div>
+                    <div id="filePreview" class="file-preview"></div>
+                    <!-- Hidden file input -->
+                    <input type="file" id="fileInput" multiple style="display: none;" accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,text/*">
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="findMatchesBtn" onclick="findMatchingLeads()">
+                        🔍 Find Relevant Leads
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearAll()">
+                        🗑️ Clear All
+                    </button>
+                </div>
+
+                <div class="example-prompts">
+                    <h4>🎯 Cloudflare Tracking Features:</h4>
+                    <div class="example-list">
+                        • <strong>100% Tracking:</strong> Every file uploaded gets click tracking URLs<br>
+                        • <strong>No Cloudinary:</strong> Pure Cloudflare infrastructure for better performance<br>
+                        • <strong>PDF Support:</strong> Works perfectly with all document types<br>
+                        • <strong>Real-time Analytics:</strong> See who views your files instantly
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification System -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // CLOUDFLARE-ONLY VERSION 2.0
+        console.log('🎯 PropertyAgent Pro v2.0 - Cloudflare Tracking Only');
+        
+        // Global variables
+        let uploadedFiles = [];
+        let isProcessing = false;
+
+        // Configuration - CLOUDFLARE ONLY
+        const CONFIG = {
+            N8N_BASE_URL: 'https://n8n.opsmith.biz/webhook',
+            AGENT_ID: 'sarah-lim-001',
+            CLOUDFLARE_WORKER_URL: 'https://propertyagent-pro-tracker.mingquan.workers.dev'
+        };
+
+        const ENDPOINTS = {
+            MATCH_LEADS: CONFIG.N8N_BASE_URL + '/match-leads',
+            SEND_MESSAGE: CONFIG.N8N_BASE_URL + '/send-message'
+        };
+
+        // CLOUDFLARE UPLOAD ONLY
+        async function triggerCloudflareUpload() {
+            console.log('🎯 Triggering Cloudflare upload');
+            document.getElementById('fileInput').click();
+        }
+
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = 'notification ' + (type || 'info');
+            notification.classList.add('show');
+            
+            setTimeout(function() {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        function clearAll() {
+            document.getElementById('messageInput').value = '';
+            uploadedFiles = [];
+            document.getElementById('filePreview').innerHTML = '';
+            showNotification('All content cleared', 'info');
+        }
+
+        async function findMatchingLeads() {
+            showNotification('Finding leads feature will be connected to your n8n workflow', 'info');
+        }
+
+        async function showFileAnalytics() {
+            showNotification('Analytics feature will be available once Cloudflare Worker is deployed', 'info');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎯 PropertyAgent Pro v2.0 Cloudflare-Only Initialized');
+            showNotification('Dashboard loaded successfully! Connect your Cloudflare Worker to enable full functionality.', 'success');
+        });
+    </script>
+</body>
+</html>
